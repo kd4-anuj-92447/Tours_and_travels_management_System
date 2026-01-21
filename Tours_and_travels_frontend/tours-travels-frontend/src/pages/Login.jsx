@@ -1,25 +1,54 @@
-import { useNavigate } from "react-router-dom";
-import { loginUser } from "../utils/auth";
+import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import "./Login.css";
 
-const Login = () => {
+export default function Login() {
+  const [role, setRole] = useState("customer");
   const navigate = useNavigate();
 
-  const handleLogin = (role) => {
-    loginUser(role === "ADMIN" ? "admin@tours.com" : "user@tours.com");
-    navigate(role === "ADMIN" ? "/admin" : "/tours");
+  const handleLogin = () => {
+    // Later you will replace this with API + JWT
+    navigate(`/${role}`);
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Login</h2>
-      <button className="btn btn-primary me-2" onClick={() => handleLogin("USER")}>
-        Login as User
-      </button>
-      <button className="btn btn-dark" onClick={() => handleLogin("ADMIN")}>
-        Login as Admin
-      </button>
+    <div className="login-container">
+      <div className="login-card">
+        <h3 className="text-center mb-3">Login</h3>
+
+        <input
+          className="form-control mb-2"
+          type="email"
+          placeholder="Email"
+        />
+
+        <input
+          type="password"
+          className="form-control mb-3"
+          placeholder="Password"
+        />
+
+        <select
+          className="form-control mb-3"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+        >
+          <option value="customer">Customer</option>
+          <option value="agent">Agent</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        <button
+          className="btn btn-primary w-100"
+          onClick={handleLogin}
+        >
+          Login
+        </button>
+
+        <p className="text-center mt-3">
+          New user? <Link to="/register">Register</Link>
+        </p>
+      </div>
     </div>
   );
-};
-
-export default Login;
+}
