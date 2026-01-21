@@ -1,0 +1,2 @@
+// axiosInstance.js
+export default {};
