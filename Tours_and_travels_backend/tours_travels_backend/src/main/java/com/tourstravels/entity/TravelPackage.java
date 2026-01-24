@@ -1,5 +1,7 @@
 package com.tourstravels.entity;
 
+import com.tourstravels.enums.PackageStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,19 +10,20 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class TravelPackage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "package_id")
     private Long packageId;
 
     private String title;
     private String destination;
-
-    @Column(name = "duration")
-    private String duration;   // VARCHAR
-
     private Double price;
+    private String duration;
 
     @Column(length = 1000)
     private String description;
@@ -28,4 +31,8 @@ public class TravelPackage {
     @ManyToOne
     @JoinColumn(name = "agent_id")
     private User agent;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private PackageStatus status;
 }

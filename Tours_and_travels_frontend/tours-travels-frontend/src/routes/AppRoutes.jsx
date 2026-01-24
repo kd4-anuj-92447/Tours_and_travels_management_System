@@ -1,42 +1,85 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+/* ================= AUTH & COMMON ================= */
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import Tours from "../pages/Tours";
-import TourDetails from "../pages/TourDetails";
-import Booking from "../pages/Booking";
-import MyBookings from "../pages/MyBookings";
-import Profile from "../pages/MyProfile";
-import NotFound from "../pages/NotFound";
-import Logout from "../pages/Logout";
+import Unauthorized from "../pages/Unauthorized";
+
+/* ================= DASHBOARDS ================= */
 import AdminDashboard from "../admin/AdminDashboard";
-import ManageTours from "../admin/ManageTours";
-import ManageBookings from "../admin/ManageBookings";
-import ManageUsers from "../admin/ManageUsers";
+import AgentDashboard from "../agent/AgentDashboard";
+import CustomerDashboard from "../customer/CustomerDashboard";
 
-const AppRoutes = () => (
-  <Routes>
-    {/* Customer / Public */}
-    <Route path="/" element={<Home />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} />
-    <Route path="/tours" element={<Tours />} />
-    <Route path="/tour/:id" element={<TourDetails />} />
-    <Route path="/booking" element={<Booking />} />
-    <Route path="/my-bookings" element={<MyBookings />} />
-    <Route path="/profile" element={<Profile />} />
+/* ================= CUSTOMER ================= */
+import CustomerPackages from "../customer/CustomerPackages";
+import MyBookings from "../customer/MyBookings";
+import MyProfile from "../customer/MyProfile";
+/* ================= ROLE GUARD ================= */
+const RequireRole = ({ role, children }) => {
+  const userRole = localStorage.getItem("role");
 
-    {/* Admin */}
-    <Route path="/admin" element={<AdminDashboard />} />
-    <Route path="/admin/tours" element={<ManageTours />} />
-    <Route path="/admin/bookings" element={<ManageBookings />} />
-    <Route path="/admin/users" element={<ManageUsers />} />
+  if (!userRole) {
+    return <Navigate to="/login" />;
+  }
 
-    {/* Fallback */}
-    <Route path="*" element={<NotFound />} />
-    <Route path="/logout" element={<Logout />} />
-  </Routes>
-);
+  if (userRole !== role) {
+    return <Navigate to="/unauthorized" />;
+  }
+
+  return children;
+};
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* ===== PUBLIC ===== */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
+
+      {/* ===== ADMIN ===== */}
+      <Route
+        path="/admin"
+        element={
+          <RequireRole role="ADMIN">
+            <AdminDashboard />
+          </RequireRole>
+        }
+      />
+
+      {/* ===== AGENT ===== */}
+      <Route
+        path="/agent"
+        element={
+          <RequireRole role="AGENT">
+            <AgentDashboard />
+          </RequireRole>
+        }
+      />
+
+      {/* ===== CUSTOMER ===== */}
+      <Route
+        path="/customer"
+        element={
+          <RequireRole role="CUSTOMER">
+            <CustomerDashboard />
+          </RequireRole>
+        }
+      >
+        
+        <Route path="/customer" element={<CustomerDashboard />} />
+    <Route path="/customer/packages" element={<CustomerPackages />} />
+    <Route path="/customer/my-bookings" element={<MyBookings />} />
+    <Route path="/customer/profile" element={<MyProfile />} />
+
+      </Route>
+
+      {/* ===== FALLBACK ===== */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+};
 
 export default AppRoutes;

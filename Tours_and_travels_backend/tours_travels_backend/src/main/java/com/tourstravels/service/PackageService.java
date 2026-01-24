@@ -1,20 +1,19 @@
 package com.tourstravels.service;
 
 import java.util.List;
-import org.springframework.stereotype.Service;
 import com.tourstravels.entity.TravelPackage;
-import com.tourstravels.repository.PackageRepository;
 
-@Service
-public class PackageService {
+public interface PackageService {
 
-    private final PackageRepository repo;
+    // CUSTOMER
+    List<TravelPackage> getApprovedPackages();
 
-    public PackageService(PackageRepository repo) {
-        this.repo = repo;
-    }
+    // AGENT
+    TravelPackage createPackage(TravelPackage travelPackage, String agentEmail);
+    List<TravelPackage> getPackagesByAgent(String agentEmail);
 
-    public List<TravelPackage> getAllPackages() {
-        return repo.findAll();
-    }
+    // ADMIN
+    List<TravelPackage> getPendingPackages();
+    TravelPackage adminDecision(Long packageId, String decision);
 }
+

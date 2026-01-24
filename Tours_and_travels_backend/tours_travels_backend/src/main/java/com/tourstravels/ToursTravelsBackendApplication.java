@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class ToursTravelsBackendApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ToursTravelsBackendApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ToursTravelsBackendApplication.class, args);
+    }
 }

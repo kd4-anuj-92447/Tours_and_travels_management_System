@@ -1,20 +1,41 @@
-export const loginUser = (email) => {
-  const user =
-    email === "admin@tours.com"
-      ? { role: "ADMIN", name: "Admin" }
-      : { role: "USER", name: "Customer" };
+export const saveAuthData = (data) => {
+  localStorage.setItem("token", data.token);
 
-  localStorage.setItem("user", JSON.stringify(user));
+  // ✅ normalize role (string OR object)
+  const role =
+    typeof data.role === "string"
+      ? data.role
+      : data.role?.roleName;
+
+  localStorage.setItem("role", role);
+
+  // 🔥 force UI update
+  window.dispatchEvent(new Event("authChanged"));
 };
 
-export const logoutUser = () => {
-  localStorage.removeItem("user");
+export const logout = () => {
+  localStorage.clear();
+  window.dispatchEvent(new Event("authChanged"));
 };
 
-export const getUser = () => {
-  return JSON.parse(localStorage.getItem("user"));
+export const isAuthenticated = () => {
+  return !!localStorage.getItem("token");
 };
 
-export const isLoggedIn = () => {
-  return !!localStorage.getItem("user");
+export const getUserRole = () => {
+  return localStorage.getItem("role");
 };
+
+export const getRedirectPathByRole = (role) => {
+  switch (role) {
+    case "ADMIN":
+      return "/admin";
+    case "AGENT":
+      return "/agent";
+    case "CUSTOMER":
+      return "/customer/packages";
+    default:
+      return "/";
+  }
+};
+
