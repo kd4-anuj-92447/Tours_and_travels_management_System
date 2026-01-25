@@ -1,24 +1,30 @@
-import { useNavigate } from "react-router-dom";
-import CustomerNavbar from "./CustomerNavbar";
+import { useContext } from "react";
+import { ThemeContext } from "./CustomerThemeContext";
+
 const CustomerDashboard = () => {
-  const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext);
+
+  const backgroundStyle = {
+    backgroundImage:
+      theme === "night"
+        ? "url('/images/northern-lights.jpg')"
+        : "url('/images/day-travel.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    minHeight: "90vh",
+    color: "white",
+  };
 
   return (
-    <>
-      <CustomerNavbar />
-      <div style={{ paddingTop: "56px" }}></div>
-      {/* HERO SECTION */}
-      <section
-        className="text-white text-center d-flex align-items-center"
-        style={{
-          minHeight: "75vh",
-          backgroundImage:
-            "linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
-          backgroundSize: "cover",
-          backgroundPosition: "center"
-        }}
-      >
-        <div className="container">
+    <div style={backgroundStyle} className="d-flex align-items-center">
+      <div className="container text-center">
+        <h1 className="fw-bold">Explore the World with Confidence</h1>
+        <p className="lead mt-3">
+          Discover amazing destinations, book unforgettable journeys,
+          and travel with peace of mind.
+        </p>
+      </div>
+      <div className="container">
           <h1 className="fw-bold display-5 mb-3">
             Explore the World with Confidence
           </h1>
@@ -33,7 +39,6 @@ const CustomerDashboard = () => {
             Browse Packages
           </button>
         </div>
-      </section>
 
       {/* FEATURES */}
       <section className="container my-5">
@@ -72,7 +77,10 @@ const CustomerDashboard = () => {
           </div>
         </div>
       </section>
-    </>
+    </div>
+
+
+    
   );
 };
 

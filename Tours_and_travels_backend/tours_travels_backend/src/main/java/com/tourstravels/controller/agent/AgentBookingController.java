@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.tourstravels.entity.Booking;
+import com.tourstravels.repository.BookingRepository;
 import com.tourstravels.service.BookingService;
 
 @RestController
@@ -15,20 +16,14 @@ import com.tourstravels.service.BookingService;
 @PreAuthorize("hasRole('AGENT')")
 public class AgentBookingController {
 
-    @Autowired
-    private BookingService bookingService;
+    private final BookingRepository bookingRepository;
 
-    @GetMapping
-    public List<Booking> getAgentBookings(Authentication auth) {
-        return bookingService.getBookingsForAgent(auth.getName());
+    public AgentBookingController(BookingRepository bookingRepository) {
+        this.bookingRepository = bookingRepository;
     }
 
-    @PutMapping("/{id}/decision")
-    public Booking agentDecision(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> body) {
-
-        return bookingService.agentDecision(id, body.get("decision"));
+    @GetMapping("/{agentId}")
+    public List<Booking> getBookingsForAgent(@PathVariable Long agentId) {
+        return bookingRepository.findBookingsByAgentId(agentId);
     }
 }
-

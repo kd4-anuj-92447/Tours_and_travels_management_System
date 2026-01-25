@@ -3,15 +3,14 @@ package com.tourstravels.serviceImpl;
 import com.tourstravels.entity.Booking;
 import com.tourstravels.entity.Payment;
 import com.tourstravels.entity.User;
+import com.tourstravels.enums.BookingStatus;
 import com.tourstravels.enums.PaymentStatus;
 import com.tourstravels.repository.BookingRepository;
 import com.tourstravels.repository.PaymentRepository;
 import com.tourstravels.service.PaymentService;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,31 +28,27 @@ public class PaymentServiceImpl implements PaymentService {
         this.bookingRepository = bookingRepository;
     }
 
-    /* ================= CREATE PAYMENT ================= */
-
     @Override
     public Payment createPayment(Long bookingId, Double amount, String paymentMode) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        // Prevent duplicate payment for same booking
-        if (paymentRepository.findByBooking(booking).isPresent()) {
-            throw new RuntimeException("Payment already exists for this booking");
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new RuntimeException("Payment allowed only for CONFIRMED bookings");
         }
+
+        paymentRepository.findByBooking(booking).ifPresent(p -> {
+            throw new RuntimeException("Payment already exists");
+        });
 
         Payment payment = Payment.builder()
                 .booking(booking)
-                .amount(amount)
-                .paymentMode(paymentMode)
-                .paymentStatus(PaymentStatus.SUCCESS)
-                .paymentDate(LocalDateTime.now())
+                .status(PaymentStatus.SUCCESS)
                 .build();
 
         return paymentRepository.save(payment);
     }
-
-    /* ================= GET SINGLE PAYMENT ================= */
 
     @Override
     public Payment getPayment(Long paymentId) {
@@ -61,14 +56,10 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
     }
 
-    /* ================= CUSTOMER ================= */
-
     @Override
     public List<Payment> getPaymentsByUser(User user) {
         return paymentRepository.findByBookingUser(user);
     }
-
-    /* ================= ADMIN ================= */
 
     @Override
     public List<Payment> getAllPayments() {
@@ -78,13 +69,14 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Payment refundPayment(Long paymentId) {
 
-        Payment payment = getPayment(paymentId);
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
 
-        if (payment.getPaymentStatus() != PaymentStatus.SUCCESS) {
+        if (payment.getStatus() != PaymentStatus.SUCCESS) {
             throw new RuntimeException("Only successful payments can be refunded");
         }
 
-        payment.setPaymentStatus(PaymentStatus.REFUNDED);
+        payment.setStatus(PaymentStatus.REFUNDED);
         return paymentRepository.save(payment);
     }
 }

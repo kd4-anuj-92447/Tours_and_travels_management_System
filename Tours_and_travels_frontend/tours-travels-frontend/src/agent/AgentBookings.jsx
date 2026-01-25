@@ -1,95 +1,116 @@
 import { useEffect, useState } from "react";
-import { getAgentBookingsApi } from "../api/agentApi";
-import { updateBookingStatusApi } from "../api/bookingApi";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import {
+  getAgentBookingsApi,
+  updateBookingStatusApi,
+} from "../api/agentApi";
+
+import { getUserRole } from "../utils/auth";
+
 const AgentBookings = () => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
 
-  const loadBookings = async () => {
-    const res = await getAgentBookingsApi();
-    setBookings(res.data);
-  };
-
   useEffect(() => {
+    if (getUserRole() !== "AGENT") {
+      navigate("/unauthorized");
+      return;
+    }
     loadBookings();
   }, []);
 
-  const updateStatus = async (bookingId, status) => {
-    await updateBookingStatusApi(bookingId, status);
-    toast.success(`Booking ${status.toLowerCase()}`);
-    loadBookings();
+  const loadBookings = async () => {
+    try {
+      const res = await getAgentBookingsApi();
+      setBookings(res.data || []);
+    } catch (error) {
+      toast.error("Failed to load bookings");
+    }
+  };
+
+  const handleDecision = async (bookingId, decision) => {
+    try {
+      await updateBookingStatusApi(bookingId, decision);
+      toast.success(`Booking ${decision.toLowerCase()}ed`);
+      loadBookings();
+    } catch {
+      toast.error("Action failed");
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "PENDING":
+        return <span className="badge bg-warning text-dark">Pending</span>;
+      case "AGENT_APPROVED":
+        return <span className="badge bg-info">Agent Approved</span>;
+      case "AGENT_REJECTED":
+        return <span className="badge bg-danger">Rejected</span>;
+      case "CONFIRMED":
+        return <span className="badge bg-success">Confirmed</span>;
+      default:
+        return <span className="badge bg-secondary">{status}</span>;
+    }
   };
 
   return (
     <div className="container mt-4">
-      <h3>Tour Bookings</h3>
+      <h3 className="mb-4">Bookings on Your Packages</h3>
 
-      <table className="table table-striped table-hover shadow">
-        <thead className="table-primary">
-          <tr>
-            <th>Customer</th>
-            <th>Tour</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {bookings.length === 0 && (
+      <div className="table-responsive">
+        <table className="table table-bordered align-middle">
+          <thead className="table-dark">
             <tr>
-              <td colSpan="4" className="text-center">
-                No bookings found
-              </td>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Package</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
-          )}
+          </thead>
 
-          {bookings.map(b => (
-            <tr key={b.bookingId}>
-              <td>{b.user?.name}</td>
-              <td>{b.tourPackage?.title}</td>
-
-              <td>
-                <span
-                  className={`badge ${
-                    b.status === "PENDING"
-                      ? "bg-warning"
-                      : b.status === "APPROVED"
-                      ? "bg-success"
-                      : "bg-danger"
-                  }`}
-                >
-                  {b.status}
-                </span>
-              </td>
-
-              <td>
-                {b.status === "PENDING" && (
-                  <>
-                    <button
-                      className="btn btn-success btn-sm me-2"
-                      onClick={() =>
-                        updateStatus(b.bookingId, "APPROVED")
-                      }
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() =>
-                        updateStatus(b.bookingId, "REJECTED")
-                      }
-                    >
-                      Reject
-                    </button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <tbody>
+            {bookings.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-center">
+                  No bookings found
+                </td>
+              </tr>
+            ) : (
+              bookings.map((b) => (
+                <tr key={b.id}>
+                  <td>{b.id}</td>
+                  <td>{b.customerName}</td>
+                  <td>{b.packageName}</td>
+                  <td>{getStatusBadge(b.status)}</td>
+                  <td>
+                    {b.status === "PENDING" ? (
+                      <>
+                        <button
+                          className="btn btn-success btn-sm me-2"
+                          onClick={() => handleDecision(b.id, "APPROVE")}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDecision(b.id, "REJECT")}
+                        >
+                          Reject
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

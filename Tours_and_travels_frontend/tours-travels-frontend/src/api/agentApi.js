@@ -1,43 +1,41 @@
-import axiosInstance from "./axiosInstance";
-/**
- * =========================
- * AGENT DASHBOARD APIs
- * =========================
- */
+import axios from "./axiosInstance";
 
-/**
- * GET agent's own packages
- * GET /api/agent/packages
- */
-export const getAgentPackagesApi = () => {
-  return axiosInstance.get("/agent/packages");
+/* ================= AGENT PACKAGES ================= */
+
+// ✅ Agent → View own packages
+export const getMyPackagesApi = () =>
+  axios.get("/api/agent/packages");
+
+// ✅ Agent → Create package
+export const createPackageApi = (data) =>
+  axios.post("/api/agent/packages", data);
+
+// ✅ Agent → Update package
+export const updatePackageApi = (id, data) =>
+  axios.put(`/api/agent/packages/${id}`, data);
+
+// ✅ Agent → Request delete (PENDING_DELETE)
+export const deletePackageApi = (id) =>
+  axios.delete(`/api/agent/packages/${id}`);
+
+// ✅ Agent → Upload images
+export const uploadPackageImagesApi = (files) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+
+  return axios.post("/api/agent/packages/upload-images", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
-/**
- * Create a new package (agent only)
- */
-export const createPackageApi = (packageData) => {
-  return axiosInstance.post("/agent/packages", packageData);
-};
+/* ================= AGENT BOOKINGS ================= */
 
-/**
- * GET agent's own bookings
- * GET /api/agent/bookings
- */
-export const getAgentBookingsApi = () => {
-  return axiosInstance.get("/agent/bookings");
-};
+export const getAgentBookingsApi = () =>
+  axios.get("/api/agent/bookings");
 
-/**
- * Update package
- */
-export const updatePackageApi = (packageId, packageData) => {
-  return axiosInstance.put(`/agent/packages/${packageId}`, packageData);
-};
-
-/**
- * Delete package
- */
-export const deletePackageApi = (packageId) => {
-  return axiosInstance.delete(`/agent/packages/${packageId}`);
-};
+export const updateBookingStatusApi = (bookingId, decision) =>
+  axios.put(`/api/agent/bookings/${bookingId}`, {
+    decision,
+  });

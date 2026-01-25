@@ -1,33 +1,59 @@
-import axiosInstance from "./axiosInstance";
+import axios from "axios";
+import { getAuthHeader } from "../utils/auth";
 
-/**
- * =========================
- * CUSTOMER BOOKINGS
- * =========================
- */
+const BASE_URL = "http://localhost:8080/api/bookings";
 
-/**
- * Create a booking for a package
- * POST /api/bookings
- */
-export const createBookingApi = (packageId) => {
-  return axiosInstance.post("/bookings", {
-    packageId
-  });
-};
+/* =========================
+   CUSTOMER
+========================= */
 
-/**
- * Get logged-in customer's bookings
- * GET /api/bookings/my
- */
 export const getMyBookingsApi = () => {
-  return axiosInstance.get("/bookings/my");
+  return axios.get(`${BASE_URL}/customer`, getAuthHeader());
 };
 
+export const createBookingApi = (bookingData) => {
+  return axios.post(`${BASE_URL}/create`, bookingData, getAuthHeader());
+};
+
+export const cancelBookingByCustomerApi = (bookingId) => {
+  return axios.put(
+    `${BASE_URL}/customer/cancel/${bookingId}`,
+    {},
+    getAuthHeader()
+  );
+};
+
+/* =========================
+   AGENT + ADMIN (SHARED)
+========================= */
+
 /**
- * Cancel a booking
- * PUT /api/bookings/{bookingId}/cancel
+ * decision values:
+ * - AGENT_APPROVED
+ * - AGENT_REJECTED
+ * - CONFIRMED
+ * - CANCELLED
  */
-export const cancelBookingApi = (bookingId) => {
-  return axiosInstance.put(`/bookings/${bookingId}/cancel`);
+export const updateBookingStatusApi = (bookingId, decision) => {
+  return axios.put(
+    `${BASE_URL}/decision/${bookingId}`,
+    { decision },
+    getAuthHeader()
+  );
+};
+
+/* =========================
+   AGENT
+========================= */
+
+export const getBookingsForAgentApi = () => {
+  return axios.get(`${BASE_URL}/agent`, getAuthHeader());
+};
+
+/* =========================
+   ADMIN
+========================= */
+
+export const getAllBookingsAdminApi = () => {
+  return axios.get(`${BASE_URL}/admin`, getAuthHeader());
 };

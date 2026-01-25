@@ -1,79 +1,101 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "./CustomerThemeContext";
 import { logout } from "../utils/auth";
+import { useState } from "react";
 
 const CustomerNavbar = () => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [query, setQuery] = useState("");
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate("/customer/packages", { state: { search: query } });
-    setQuery("");
+    navigate(`/customer/packages?search=${query}`);
   };
 
   return (
     <nav
-      className="navbar navbar-expand-lg navbar-dark bg-dark px-3 shadow"
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 1050
-      }}
+      className={`navbar navbar-expand-lg ${
+        theme === "night" ? "navbar-dark bg-black" : "navbar-dark bg-primary"
+      }`}
     >
-      <span
-        className="navbar-brand fw-bold"
-        style={{ cursor: "pointer" }}
-        onClick={() => navigate("/customer")}
-      >
-        Tours & Travels
-      </span>
+      <div className="container-fluid px-4">
 
-      {/* SEARCH BAR */}
-      <form className="d-flex mx-auto" onSubmit={handleSearch}>
-        <input
-          className="form-control form-control-sm me-2"
-          placeholder="Search destinations..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button className="btn btn-outline-light btn-sm">
-          Search
-        </button>
-      </form>
-
-      {/* ACTION BUTTONS */}
-      <div className="d-flex gap-2">
-        <button
-          className="btn btn-outline-light btn-sm"
-          onClick={() => navigate("/customer/packages")}
+        {/* BRAND */}
+        <span
+          className="navbar-brand fw-bold"
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/customer/dashboard")}
         >
-          Browse Packages
-        </button>
+          Tours & Travels
+        </span>
 
-        <button
-          className="btn btn-outline-light btn-sm"
-          onClick={() => navigate("/customer/my-bookings")}
-        >
-          My Bookings
-        </button>
+        {/* SEARCH */}
+        <form className="d-flex ms-3 me-auto" onSubmit={handleSearch}>
+          <input
+            className="form-control form-control-sm"
+            type="search"
+            placeholder="Search packages..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </form>
 
-        <button
-          className="btn btn-outline-light btn-sm"
-          onClick={() => navigate("/customer/profile")}
-        >
-          My Profile
-        </button>
+        {/* NAV ITEMS */}
+        <ul className="navbar-nav align-items-center">
 
-        <button
-          className="btn btn-danger btn-sm"
-          onClick={() => {
-            logout();
-            navigate("/login");
-          }}
-        >
-          Logout
-        </button>
+          <li className="nav-item mx-2">
+            <button
+              className="btn btn-sm btn-outline-light"
+              onClick={() => navigate("/customer/dashboard")}
+            >
+              Dashboard
+            </button>
+          </li>
+
+          <li className="nav-item mx-2">
+            <button
+              className="btn btn-sm btn-outline-light"
+              onClick={() => navigate("/customer/packages")}
+            >
+              Packages
+            </button>
+          </li>
+
+          <li className="nav-item mx-2">
+            <button
+              className="btn btn-sm btn-outline-light"
+              onClick={() => navigate("/customer/profile")}
+            >
+              My Profile
+            </button>
+          </li>
+
+          {/* 🌙 / 🌞 THEME TOGGLE */}
+          <li className="nav-item mx-2">
+            <button
+              className="btn btn-sm btn-outline-light"
+              onClick={toggleTheme}
+              title="Toggle Theme"
+            >
+              {theme === "day" ? "🌙 Night" : "🌞 Day"}
+            </button>
+          </li>
+
+          {/* LOGOUT */}
+          <li className="nav-item mx-2">
+            <button
+              className="btn btn-sm btn-danger"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
+              Logout
+            </button>
+          </li>
+
+        </ul>
       </div>
     </nav>
   );

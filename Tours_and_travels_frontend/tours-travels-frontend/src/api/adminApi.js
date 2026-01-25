@@ -1,35 +1,67 @@
-import axiosInstance from "./axiosInstance";
+import axios from "./axiosInstance";
 
-/* ================= USERS ================= */
-
-export const getAllUsersApi = () =>
-  axiosInstance.get("/admin/users");
+/* ================= USERS (READ ONLY) ================= */
+export const getAllUsersApi = () => {
+  return axios.get("/admin/users");
+};
 
 /* ================= PACKAGES ================= */
+export const getAllPackagesAdminApi = () => {
+  return axios.get("/admin/packages");
+};
 
-// Pending packages only
-export const getPendingPackagesApi = () =>
-  axiosInstance.get("/admin/packages/pending");
+export const approvePackageApi = (packageId) => {
+  return axios.put(`/admin/packages/approve/${packageId}`);
+};
 
-// Admin approve / reject package
-export const adminPackageDecisionApi = (packageId, decision) =>
-  axiosInstance.put(`/admin/packages/${packageId}/decision`, { decision });
+export const rejectPackageApi = (packageId) => {
+  return axios.put(`/admin/packages/reject/${packageId}`);
+};
+
+
+export const approveDeletePackageAdminApi = (packageId) =>
+  axios.delete(`/api/admin/packages/${packageId}`);
 
 /* ================= BOOKINGS ================= */
+export const getAllBookingsAdminApi = () => {
+  return axios.get("/admin/bookings");
+};
 
-// All bookings (admin full view)
-export const getAllBookingsAdminApi = () =>
-  axiosInstance.get("/admin/bookings");
+export const confirmBookingAdminApi = (bookingId) => {
+  return axios.put(`/admin/bookings/confirm/${bookingId}`);
+};
 
-// Pending bookings (AGENT_APPROVED only)
-export const getPendingBookingsAdminApi = () =>
-  axiosInstance.get("/admin/bookings/pending");
+export const getPendingPackagesAdminApi = () => {
+  return axios.get("/admin/packages/pending");
+};
 
-// Admin confirm / cancel booking
-export const adminBookingDecisionApi = (bookingId, decision) =>
-  axiosInstance.put(`/admin/bookings/${bookingId}/decision`, { decision });
+export const cancelBookingByAdmin = (bookingId) => {
+  return axios.put(`/admin/bookings/cancel/${bookingId}`);
+};
 
 /* ================= PAYMENTS ================= */
+export const getAllPaymentsAdminApi = () => {
+  return axios.get("/admin/payments");
+};
 
-export const getAllPaymentsApi = () =>
-  axiosInstance.get("/admin/payments");
+export const confirmPaymentAdminApi = (paymentId) => {
+  return axios.put(`/admin/payments/confirm/${paymentId}`);
+};
+
+export const getToken = () => {
+  return localStorage.getItem("token");
+};
+
+export const getAuthHeader = () => {
+  const token = getToken();
+
+  if (!token) {
+    return {};
+  }
+
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};

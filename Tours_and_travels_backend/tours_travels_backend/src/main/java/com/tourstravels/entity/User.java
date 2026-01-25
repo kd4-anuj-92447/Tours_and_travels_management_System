@@ -2,6 +2,7 @@ package com.tourstravels.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
@@ -13,18 +14,29 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long userId;
+    private Long userId;   // 🔴 REQUIRED for findByUserUserId
 
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    @JsonIgnore
     private String password;
+
+    /* ================= ROLE ================= */
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    /* ================= CUSTOMER PROFILE ================= */
+
     private String phone;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id")
-    private Role role;
+    private String address;
+
+    private String profilePicUrl;
 }

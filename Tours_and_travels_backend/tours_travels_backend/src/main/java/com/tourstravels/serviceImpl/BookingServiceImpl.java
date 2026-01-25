@@ -1,43 +1,87 @@
 package com.tourstravels.serviceImpl;
 
 import com.tourstravels.entity.Booking;
+import com.tourstravels.entity.TravelPackage;
 import com.tourstravels.entity.User;
+import com.tourstravels.enums.BookingStatus;
+import com.tourstravels.enums.PackageStatus;
 import com.tourstravels.repository.BookingRepository;
+import com.tourstravels.repository.PackageRepository;
 import com.tourstravels.repository.UserRepository;
 import com.tourstravels.service.BookingService;
-import com.tourstravels.enums.BookingStatus;
-
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
+    private final PackageRepository packageRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    /* ================= CUSTOMER ================= */
-
-    @Override
-    public Booking createBooking(Booking booking) {
-    	booking.setStatus(BookingStatus.PENDING);
-
-        booking.setBookingDate(LocalDateTime.now());
-        return bookingRepository.save(booking);
+    public BookingServiceImpl(
+            BookingRepository bookingRepository,
+            PackageRepository packageRepository,
+            UserRepository userRepository
+    ) {
+        this.bookingRepository = bookingRepository;
+        this.packageRepository = packageRepository;
+        this.userRepository = userRepository;
     }
+
+    /* CUSTOMER */
 
     @Override
     public List<Booking> getBookingsByUser(Long userId) {
         return bookingRepository.findByUserUserId(userId);
     }
 
-    /* ================= AGENT ================= */
+    @Override
+    public Booking createBooking(Booking booking) {
+
+        User customer = userRepository.findById(
+                booking.getUser().getUserId()
+        ).orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        TravelPackage travelPackage = packageRepository.findById(
+                booking.getTourPackage().getId()
+        ).orElseThrow(() -> new RuntimeException("Package not found"));
+
+        if (travelPackage.getStatus() != PackageStatus.APPROVED) {
+            throw new RuntimeException("Package not approved");
+        }
+
+        booking.setUser(customer);
+        booking.setTourPackage(travelPackage);
+        booking.setAmount(BigDecimal.valueOf(travelPackage.getPrice()));
+        booking.setStatus(BookingStatus.PENDING);
+
+        return bookingRepository.save(booking);
+    }
+
+    @Override
+    public Booking cancelByCustomer(Long bookingId, Long customerId) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (!booking.getUser().getUserId().equals(customerId)) {
+            throw new RuntimeException("Unauthorized cancellation");
+        }
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Only PENDING bookings can be cancelled");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED_BY_CUSTOMER);
+        return bookingRepository.save(booking);
+    }
+
+    /* AGENT */
 
     @Override
     public List<Booking> getBookingsForAgent(String agentEmail) {
@@ -50,26 +94,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking agentDecision(Long bookingId, String decision) {
-
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-
-        // Guard: agent can act only on fresh bookings
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new RuntimeException("Booking already processed");
-        }
-
-        if ("APPROVE".equalsIgnoreCase(decision)) {
-            booking.setStatus(BookingStatus.AGENT_APPROVED);
-        } else if ("REJECT".equalsIgnoreCase(decision)) {
-            booking.setStatus(BookingStatus.AGENT_REJECTED);
-        }
-
-
-        return bookingRepository.save(booking);
+        throw new UnsupportedOperationException(
+                "Agents cannot make booking decisions"
+        );
     }
 
-    /* ================= ADMIN ================= */
+    /* ADMIN */
 
     @Override
     public List<Booking> getBookingsForAdmin() {
@@ -82,43 +112,17 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        // Guard: admin acts only after agent approval
-        if (booking.getStatus() != BookingStatus.AGENT_APPROVED) {
-            throw new RuntimeException("Booking not ready for admin action");
+        switch (decision.toUpperCase()) {
+            case "CONFIRM":
+                booking.setStatus(BookingStatus.CONFIRMED);
+                break;
+            case "CANCEL":
+                booking.setStatus(BookingStatus.CANCELLED);
+                break;
+            default:
+                throw new RuntimeException("Invalid admin decision");
         }
-
-        if ("CONFIRM".equalsIgnoreCase(decision)) {
-            booking.setStatus(BookingStatus.CONFIRMED);
-        } else if ("CANCEL".equalsIgnoreCase(decision)) {
-            booking.setStatus(BookingStatus.CANCELLED);
-        }
-
 
         return bookingRepository.save(booking);
     }
-    
-    @Override
-    public Booking cancelByCustomer(Long bookingId, Long customerId) {
-
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-
-        // Ownership check
-        if (!booking.getUser().getUserId().equals(customerId)) {
-            throw new RuntimeException("Unauthorized cancellation attempt");
-        }
-
-        // Status guard
-        if (
-        	    booking.getStatus() != BookingStatus.PENDING &&
-        	    booking.getStatus() != BookingStatus.AGENT_APPROVED
-        	) {
-        	    throw new RuntimeException("Booking cannot be cancelled");
-        	}
-
-        	booking.setStatus(BookingStatus.CANCELLED_BY_CUSTOMER);
-
-        return bookingRepository.save(booking);
-    }
-
 }

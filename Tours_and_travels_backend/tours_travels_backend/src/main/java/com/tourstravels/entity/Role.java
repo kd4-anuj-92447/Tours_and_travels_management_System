@@ -8,13 +8,13 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
-    private Long roleId;
+    private Long id;
 
-    @Column(name = "role_name", unique = true, nullable = false)
-    private String roleName;
+    @Column(unique = true, nullable = false)
+    private String roleName; // ADMIN, AGENT, CUSTOMER
 }

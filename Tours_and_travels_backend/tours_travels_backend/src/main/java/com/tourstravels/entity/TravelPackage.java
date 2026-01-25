@@ -1,38 +1,51 @@
 package com.tourstravels.entity;
 
 import com.tourstravels.enums.PackageStatus;
-
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
-@Table(name = "packages")
+@Table(name = "travel_packages")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Getter
-@Setter
 public class TravelPackage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "package_id")
-    private Long packageId;
+    private Long id;
 
+    @Column(nullable = false)
     private String title;
-    private String destination;
-    private Double price;
-    private String duration;
 
-    @Column(length = 1000)
+    @Column(length = 2000)
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "agent_id")
-    private User agent;
-    
+    @Column(nullable = false)
+    private Double price;
+
+    /* ================= STATUS ================= */
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(nullable = false)
     private PackageStatus status;
+
+    /* ================= AGENT ================= */
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agent_id", nullable = false)
+    private User agent;
+
+    /* ================= IMAGES ================= */
+
+    @ElementCollection
+    @CollectionTable(
+        name = "package_images",
+        joinColumns = @JoinColumn(name = "package_id")
+    )
+    @Column(name = "image_url")
+    private List<String> imageUrls;
 }

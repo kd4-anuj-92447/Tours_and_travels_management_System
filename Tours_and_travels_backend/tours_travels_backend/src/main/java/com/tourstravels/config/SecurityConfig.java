@@ -26,12 +26,22 @@ public class SecurityConfig {
             throws Exception {
 
         http
+            .cors(cors -> cors.disable())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(401, "Unauthorized")
+                )
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                    response.sendError(403, "Access Denied")
+                )
+            )
             .authorizeHttpRequests(auth -> auth
             	    .requestMatchers("/api/auth/**").permitAll()
+            	    .requestMatchers("/api/admin/users/test").permitAll()
             	    .requestMatchers("/api/admin/**").hasRole("ADMIN")
             	    .requestMatchers("/api/agent/**").hasRole("AGENT")
             	    .requestMatchers("/api/customer/**").hasRole("CUSTOMER")

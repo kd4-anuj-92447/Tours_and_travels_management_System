@@ -3,5 +3,6 @@ package com.tourstravels.enums;
 public enum PackageStatus {
 	 PENDING,
 	    APPROVED,
-	    REJECTED
+	    REJECTED, 
+	    PENDING_DELETE
 }

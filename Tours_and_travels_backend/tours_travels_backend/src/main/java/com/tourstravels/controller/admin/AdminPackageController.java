@@ -1,39 +1,51 @@
 package com.tourstravels.controller.admin;
 
 import com.tourstravels.entity.TravelPackage;
-import com.tourstravels.service.PackageService;
+import com.tourstravels.enums.PackageStatus;
+import com.tourstravels.repository.PackageRepository;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/packages")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminPackageController {
 
-    private final PackageService packageService;
+    private final PackageRepository packageRepository;
 
-    public AdminPackageController(PackageService packageService) {
-        this.packageService = packageService;
+    public AdminPackageController(PackageRepository packageRepository) {
+        this.packageRepository = packageRepository;
     }
 
-    /* ================= PENDING PACKAGES ================= */
-
+    @GetMapping
+    public List<TravelPackage> getAllPackages() {
+        return packageRepository.findAll();
+    }
+    
     @GetMapping("/pending")
     public List<TravelPackage> getPendingPackages() {
-        return packageService.getPendingPackages();
+        return packageRepository.findByStatus(PackageStatus.PENDING);
     }
 
-    /* ================= ADMIN DECISION ================= */
+    @PutMapping("/approve/{id}")
+    public ResponseEntity<?> approvePackage(@PathVariable Long id) {
+        TravelPackage pkg = packageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Package not found"));
+        pkg.setStatus(PackageStatus.APPROVED);
+        packageRepository.save(pkg);
+        return ResponseEntity.ok("Package approved");
+    }
 
-    @PutMapping("/{id}/decision")
-    public TravelPackage adminDecision(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> body) {
-
-        return packageService.adminDecision(id, body.get("decision"));
+    @PutMapping("/reject/{id}")
+    public ResponseEntity<?> rejectPackage(@PathVariable Long id) {
+        TravelPackage pkg = packageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Package not found"));
+        pkg.setStatus(PackageStatus.REJECTED);
+        packageRepository.save(pkg);
+        return ResponseEntity.ok("Package rejected");
     }
 }

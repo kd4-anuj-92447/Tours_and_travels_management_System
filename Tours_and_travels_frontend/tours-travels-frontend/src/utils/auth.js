@@ -1,7 +1,9 @@
+// src/utils/auth.js
+
 export const saveAuthData = (data) => {
   localStorage.setItem("token", data.token);
 
-  // ✅ normalize role (string OR object)
+  // normalize role (string OR object)
   const role =
     typeof data.role === "string"
       ? data.role
@@ -9,7 +11,7 @@ export const saveAuthData = (data) => {
 
   localStorage.setItem("role", role);
 
-  // 🔥 force UI update
+  // force UI update
   window.dispatchEvent(new Event("authChanged"));
 };
 
@@ -39,3 +41,21 @@ export const getRedirectPathByRole = (role) => {
   }
 };
 
+
+export const getToken = () => {
+  return localStorage.getItem("token");
+};
+
+export const getAuthHeader = () => {
+  const token = getToken();
+
+  if (!token) {
+    return {};
+  }
+
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};

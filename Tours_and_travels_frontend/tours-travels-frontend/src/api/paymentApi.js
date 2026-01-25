@@ -16,3 +16,21 @@ export const createPaymentApi = (paymentData) => {
 export const getMyPaymentsApi = () => {
   return axiosInstance.get("/payments/my");
 };
+
+export const getToken = () => {
+  return localStorage.getItem("token");
+};
+
+export const getAuthHeader = () => {
+  const token = getToken();
+
+  if (!token) {
+    return {};
+  }
+
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};

@@ -12,7 +12,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-  e.preventDefault(); // 🔐 PREVENT FORM SUBMIT RELOAD
+  e.preventDefault(); // PREVENT FORM SUBMIT RELOAD
 
   try {
     const res = await loginApi(email, password);

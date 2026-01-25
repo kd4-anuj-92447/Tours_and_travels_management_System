@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../utils/auth";
+import { logout } from "../utils/auth";
 
 const Logout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    logoutUser();
+    logout();
     navigate("/login", { replace: true });
   }, [navigate]);
 

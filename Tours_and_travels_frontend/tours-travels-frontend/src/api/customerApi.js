@@ -1,26 +1,70 @@
-import axiosInstance from "./axiosInstance";
+import axios from "./axiosInstance";
 
 /* ================= PACKAGES ================= */
 
+/**
+ * Get ONLY approved packages for customers
+ */
 export const getApprovedPackagesApi = () => {
-  return axiosInstance.get("/customer/packages");
+  return axios.get("/customer/packages");
+};
+
+/**
+ * Get single package details (optional – for future package detail page)
+ */
+export const getPackageByIdCustomerApi = (packageId) => {
+  return axios.get(`/customer/packages/${packageId}`);
 };
 
 /* ================= BOOKINGS ================= */
 
-export const createBookingApi = (bookingData) => {
-  return axiosInstance.post("/customer/bookings", bookingData);
+/**
+ * Create a booking for a package
+ * Status will be PENDING (admin confirmation required)
+ */
+export const createBookingCustomerApi = (packageId) => {
+  return axios.post(`/customer/bookings/${packageId}`);
 };
 
-export const getCustomerBookingsApi = () => {
-  return axiosInstance.get("/customer/bookings");
+/**
+ * Get all bookings of logged-in customer
+ */
+export const getMyBookingsCustomerApi = () => {
+  return axios.get("/customer/bookings");
 };
 
-export const cancelBookingApi = (bookingId) => {
-  return axiosInstance.put(`/customer/bookings/${bookingId}/cancel`);
+/* ================= PAYMENTS ================= */
+
+export const createPaymentApi = (bookingId) => {
+  return axios.post(`/customer/payments/${bookingId}`);
 };
 
-// Get customer payments
-export const getMyPaymentsApi = () => {
-  return axiosInstance.get("/customer/payments");
+/* ================= PROFILE ================= */
+export const getCustomerProfileApi = () => {
+  return axios.get("/customer/profile");
+};
+
+/**
+ * Update customer profile (username, phone, address, profilePicUrl)
+ */
+export const updateCustomerProfileApi = (data) => {
+  return axios.put("/customer/profile", data);
+};
+
+export const getToken = () => {
+  return localStorage.getItem("token");
+};
+
+export const getAuthHeader = () => {
+  const token = getToken();
+
+  if (!token) {
+    return {};
+  }
+
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 };

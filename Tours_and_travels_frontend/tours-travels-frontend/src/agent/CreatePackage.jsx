@@ -1,75 +1,141 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createPackageApi } from "../api/agentApi";
+import {
+  createPackageApi,
+  uploadPackageImagesApi,
+} from "../api/agentApi";
+import { toast } from "react-toastify";
 
 const CreatePackage = () => {
-  const navigate = useNavigate();
-
   const [form, setForm] = useState({
     title: "",
     description: "",
-    location: "",
     price: "",
-    durationDays: ""
   });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const [files, setFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  /* ================= IMAGE SELECTION ================= */
+
+  const handleFileChange = (e) => {
+    const selected = [...e.target.files].slice(0, 5);
+    setFiles(selected);
+
+    // local preview only
+    const previews = selected.map((f) => URL.createObjectURL(f));
+    setPreviewUrls(previews);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await createPackageApi(form);
-    navigate("/agent/packages");
+  /* ================= SUBMIT ================= */
+
+  const submit = async () => {
+    if (!form.title || !form.description || !form.price) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (files.length === 0) {
+      toast.error("Please select at least one image");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 1️⃣ Create package (PENDING)
+      const pkgRes = await createPackageApi(form);
+      const packageId = pkgRes.data.id;
+
+      // 2️⃣ Upload images
+      await uploadPackageImagesApi(packageId, files);
+
+      toast.success("Package submitted for admin approval", {
+        autoClose: 2000,
+      });
+
+      // reset form
+      setForm({ title: "", description: "", price: "" });
+      setFiles([]);
+      setPreviewUrls([]);
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create package");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  /* ================= UI ================= */
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>Create Travel Package</h3>
+    <div className="container mt-4">
+      <div className="card shadow p-4">
+        <h3 className="mb-3">Create Tour Package</h3>
 
-      <input
-        name="title"
-        placeholder="Title"
-        onChange={handleChange}
-        required
-      />
+        <input
+          className="form-control mb-2"
+          placeholder="Title"
+          value={form.title}
+          onChange={(e) =>
+            setForm({ ...form, title: e.target.value })
+          }
+        />
 
-      <input
-        name="location"
-        placeholder="Location"
-        onChange={handleChange}
-        required
-      />
+        <textarea
+          className="form-control mb-2"
+          placeholder="Description"
+          rows="3"
+          value={form.description}
+          onChange={(e) =>
+            setForm({ ...form, description: e.target.value })
+          }
+        />
 
-      <input
-        name="price"
-        type="number"
-        placeholder="Price"
-        onChange={handleChange}
-        required
-      />
+        <input
+          type="number"
+          className="form-control mb-3"
+          placeholder="Price"
+          value={form.price}
+          onChange={(e) =>
+            setForm({ ...form, price: e.target.value })
+          }
+        />
 
-      <input
-        name="durationDays"
-        type="number"
-        placeholder="Duration (days)"
-        onChange={handleChange}
-        required
-      />
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          className="form-control mb-3"
+          onChange={handleFileChange}
+        />
 
-      <textarea
-        name="description"
-        placeholder="Description"
-        onChange={handleChange}
-      />
+        {/* Image previews */}
+        {previewUrls.length > 0 && (
+          <div className="row mb-3">
+            {previewUrls.map((url, i) => (
+              <div className="col-md-2" key={i}>
+                <img
+                  src={url}
+                  alt="preview"
+                  className="img-fluid rounded"
+                  style={{ height: "80px", objectFit: "cover" }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
-      <div style={{ marginTop: "10px" }}>
-        <button type="submit">Create Package</button>
-        <button type="button" onClick={() => navigate("/agent/packages")}>
-          Cancel
+        <button
+          className="btn btn-primary w-100"
+          onClick={submit}
+          disabled={loading}
+        >
+          {loading ? "Submitting..." : "Submit for Approval"}
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

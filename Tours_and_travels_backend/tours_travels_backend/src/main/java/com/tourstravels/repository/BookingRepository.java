@@ -12,4 +12,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // AGENT → Bookings for agent's packages
     List<Booking> findByTourPackageAgent(User agent);
+
+	List<Booking> findBookingsByAgentId(Long agentId);
 }
