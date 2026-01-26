@@ -27,7 +27,7 @@ const ManageUsers = () => {
       console.error("Error loading users:", err);
       console.error("Error response status:", err.response?.status);
       console.error("Error response data:", err.response?.data);
-      toast.error(err.response?.data?.message || "Failed to load users");
+      toast.error(err.response?.data?.message || "Failed to load users", { autoClose: 1000 });
     } finally {
       setLoading(false);
     }

@@ -5,10 +5,13 @@ import com.tourstravels.entity.TravelPackage;
 import com.tourstravels.entity.User;
 import com.tourstravels.enums.BookingStatus;
 import com.tourstravels.enums.PackageStatus;
+import com.tourstravels.enums.PaymentStatus;
 import com.tourstravels.repository.BookingRepository;
 import com.tourstravels.repository.PackageRepository;
 import com.tourstravels.repository.UserRepository;
 import com.tourstravels.service.BookingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,8 @@ import java.util.List;
 @Service
 @Transactional
 public class BookingServiceImpl implements BookingService {
+
+    private static final Logger logger = LoggerFactory.getLogger(BookingServiceImpl.class);
 
     private final BookingRepository bookingRepository;
     private final PackageRepository packageRepository;
@@ -59,6 +64,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setTourPackage(travelPackage);
         booking.setAmount(BigDecimal.valueOf(travelPackage.getPrice()));
         booking.setStatus(BookingStatus.PENDING);
+        booking.setPaymentStatus(PaymentStatus.PENDING);  // Initially PENDING payment
 
         return bookingRepository.save(booking);
     }
@@ -103,7 +109,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getBookingsForAdmin() {
-        return bookingRepository.findAll();
+        logger.info("📅 getBookingsForAdmin() - Fetching all bookings with eager loading");
+        List<Booking> bookings = bookingRepository.findAllWithDetails();
+        logger.info("✅ Retrieved {} bookings", bookings.size());
+        return bookings;
     }
 
     @Override

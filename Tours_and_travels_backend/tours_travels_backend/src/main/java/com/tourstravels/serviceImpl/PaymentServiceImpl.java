@@ -10,12 +10,16 @@ import com.tourstravels.repository.PaymentRepository;
 import com.tourstravels.service.PaymentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Service
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaymentServiceImpl.class);
 
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
@@ -63,7 +67,25 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<Payment> getAllPayments() {
-        return paymentRepository.findAll();
+        logger.info("💳 getAllPayments() - Fetching all payments with eager loading");
+        List<Payment> payments = paymentRepository.findAllWithDetails();
+        logger.info("✅ Retrieved {} payments", payments.size());
+        return payments;
+    }
+
+    @Override
+    public Payment confirmPayment(Long paymentId) {
+        logger.info("✅ Confirming payment ID: {}", paymentId);
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            throw new RuntimeException("Only PENDING payments can be confirmed");
+        }
+
+        payment.setStatus(PaymentStatus.SUCCESS);
+        logger.info("✅ Payment {} confirmed successfully", paymentId);
+        return paymentRepository.save(payment);
     }
 
     @Override
@@ -76,7 +98,9 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("Only successful payments can be refunded");
         }
 
+        logger.info("💰 Refunding payment ID: {}", paymentId);
         payment.setStatus(PaymentStatus.REFUNDED);
+        logger.info("✅ Payment {} refunded successfully", paymentId);
         return paymentRepository.save(payment);
     }
 }

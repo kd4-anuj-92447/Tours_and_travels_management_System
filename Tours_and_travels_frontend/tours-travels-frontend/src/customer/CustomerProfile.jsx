@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import CustomerNavbar from "./CustomerNavbar";
 import {
   getCustomerProfileApi,
   updateCustomerProfileApi,
@@ -33,7 +32,7 @@ const CustomerProfile = () => {
       });
     } catch (error) {
       console.error("Failed to load profile", error);
-      toast.error("Failed to load profile");
+      toast.error("Failed to load profile", { autoClose: 1000 });
     }
   };
 
@@ -65,23 +64,20 @@ const CustomerProfile = () => {
       });
 
       toast.success("Profile updated successfully", {
-        autoClose: 2000,
+        autoClose: 1000,
       });
     } catch (error) {
       console.error("Profile update failed", error);
-      toast.error("Failed to update profile");
+      toast.error("Failed to update profile", { autoClose: 1000 });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <CustomerNavbar />
-
-      <div className="container mt-4">
-        <div className="card shadow p-4 mx-auto" style={{ maxWidth: "520px" }}>
-          <h3 className="mb-3 text-center">My Profile</h3>
+    <div className="container mt-4">
+      <div className="card shadow p-4 mx-auto" style={{ maxWidth: "520px" }}>
+        <h3 className="mb-3 text-center">My Profile</h3>
 
           {/* Profile Picture */}
           <div className="text-center mb-3">
@@ -145,8 +141,7 @@ const CustomerProfile = () => {
           </button>
         </div>
       </div>
-    </>
-  );
-};
-
-export default CustomerProfile;
+    );
+  };
+  
+  export default CustomerProfile;

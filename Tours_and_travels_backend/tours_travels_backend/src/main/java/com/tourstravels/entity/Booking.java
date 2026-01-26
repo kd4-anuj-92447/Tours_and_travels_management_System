@@ -1,6 +1,8 @@
 package com.tourstravels.entity;
 
 import com.tourstravels.enums.BookingStatus;
+import com.tourstravels.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,9 +35,28 @@ public class Booking {
     @Column(nullable = false, length = 40)
     private BookingStatus status;
 
+    /* PAYMENT STATUS */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 40)
+    private PaymentStatus paymentStatus;
+
     /* MONEY — MUST BE DECIMAL */
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
+
+    /* ================= TRANSIENT PROPERTIES FOR API ================= */
+
+    @Transient
+    @JsonProperty("customerName")
+    public String getCustomerName() {
+        return user != null ? user.getName() : "N/A";
+    }
+
+    @Transient
+    @JsonProperty("packageName")
+    public String getPackageName() {
+        return tourPackage != null ? tourPackage.getTitle() : "N/A";
+    }
 
     /* DERIVED PROPERTY — DO NOT REMOVE */
     @Transient

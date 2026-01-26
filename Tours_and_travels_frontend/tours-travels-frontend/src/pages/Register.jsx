@@ -21,10 +21,10 @@ const Register = () => {
         phone,
       });
 
-      toast.success("Registration successful. Please login.");
+      toast.success("Registration successful. Please login.", { autoClose: 1000 });
       navigate("/login");
     } catch (error) {
-      toast.error("Registration failed");
+      toast.error("Registration failed", { autoClose: 1000 });
     }
   };
 

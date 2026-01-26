@@ -13,7 +13,9 @@ public interface PackageService {
     List<TravelPackage> getPackagesByAgent(String agentEmail);
 
     // ADMIN
+    List<TravelPackage> getAllPackages();
     List<TravelPackage> getPendingPackages();
     TravelPackage adminDecision(Long packageId, String decision);
+    void deletePackage(Long packageId);
 }
 

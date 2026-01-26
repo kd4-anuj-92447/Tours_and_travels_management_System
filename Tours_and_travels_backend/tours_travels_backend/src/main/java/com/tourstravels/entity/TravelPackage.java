@@ -1,6 +1,7 @@
 package com.tourstravels.entity;
 
 import com.tourstravels.enums.PackageStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,4 +49,12 @@ public class TravelPackage {
     )
     @Column(name = "image_url")
     private List<String> imageUrls;
+
+    /* ================= TRANSIENT PROPERTIES FOR API ================= */
+
+    @Transient
+    @JsonProperty("agentName")
+    public String getAgentName() {
+        return agent != null ? agent.getName() : "N/A";
+    }
 }

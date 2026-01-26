@@ -6,7 +6,7 @@ import axiosInstance from "./axiosInstance";
  * =========================
  */
 export const createPaymentApi = (paymentData) => {
-  return axiosInstance.post("/payments", paymentData);
+  return axiosInstance.post("/customer/payments", paymentData);
 };
 
 /**

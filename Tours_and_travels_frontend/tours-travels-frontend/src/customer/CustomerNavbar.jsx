@@ -65,6 +65,15 @@ const CustomerNavbar = () => {
           <li className="nav-item mx-2">
             <button
               className="btn btn-sm btn-outline-light"
+              onClick={() => navigate("/customer/bookings")}
+            >
+              My Bookings
+            </button>
+          </li>
+
+          <li className="nav-item mx-2">
+            <button
+              className="btn btn-sm btn-outline-light"
               onClick={() => navigate("/customer/profile")}
             >
               My Profile

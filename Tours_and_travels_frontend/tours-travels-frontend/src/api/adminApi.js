@@ -18,9 +18,8 @@ export const rejectPackageApi = (packageId) => {
   return axios.put(`/admin/packages/reject/${packageId}`);
 };
 
-
 export const approveDeletePackageAdminApi = (packageId) =>
-  axios.delete(`/api/admin/packages/${packageId}`);
+  axios.delete(`/admin/packages/${packageId}`);
 
 /* ================= BOOKINGS ================= */
 export const getAllBookingsAdminApi = () => {

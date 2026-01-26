@@ -41,6 +41,19 @@ export const getRedirectPathByRole = (role) => {
   }
 };
 
+export const getDashboardPathByRole = (role) => {
+  switch (role) {
+    case "ADMIN":
+      return "/admin";
+    case "AGENT":
+      return "/agent";
+    case "CUSTOMER":
+      return "/customer";
+    default:
+      return "/";
+  }
+};
+
 
 export const getToken = () => {
   return localStorage.getItem("token");

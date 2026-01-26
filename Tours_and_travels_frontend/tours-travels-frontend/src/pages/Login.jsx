@@ -20,7 +20,7 @@ const Login = () => {
     // Save token + role (unchanged logic)
     saveAuthData(res.data);
 
-    toast.success("Login successful");
+    toast.success("Login successful", { autoClose: 1000 });
 
     //  SAFETY: normalize role
     const role = res.data.role?.toUpperCase();
@@ -31,7 +31,7 @@ const Login = () => {
     navigate(redirectPath, { replace: true });
 
   } catch (error) {
-    toast.error("Invalid email or password");
+    toast.error("Invalid email or password", { autoClose: 1000 });
   }
 };
 

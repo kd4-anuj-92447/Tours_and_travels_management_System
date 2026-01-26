@@ -15,5 +15,7 @@ public interface PaymentService {
 
     List<Payment> getAllPayments();
 
+    Payment confirmPayment(Long paymentId);
+
     Payment refundPayment(Long paymentId);
 }

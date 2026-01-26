@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 const Unauthorized = () => {
   useEffect(() => {
-    toast.error("You are not authorized to access this page");
+    toast.error("You are not authorized to access this page", { autoClose: 1000 });
   }, []);
 
   return (

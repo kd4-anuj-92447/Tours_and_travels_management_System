@@ -26,6 +26,7 @@ import CustomerDashboard from "../customer/CustomerDashboard";
 import CustomerPackages from "../customer/CustomerPackages";
 import CustomerBookings from "../customer/CustomerBookings";
 import CustomerProfile from "../customer/CustomerProfile";
+import Payment from "../customer/Payment";
 
 /* ========== Auth Utils ========== */
 import { isAuthenticated, getUserRole } from "../utils/auth";
@@ -132,6 +133,7 @@ const AppRoutes = () => {
         <Route index element={<CustomerDashboard />} />
         <Route path="packages" element={<CustomerPackages />} />
         <Route path="bookings" element={<CustomerBookings />} />
+        <Route path="payment/:bookingId" element={<Payment />} />
         <Route path="profile" element={<CustomerProfile />} />
       </Route>
 
