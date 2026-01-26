@@ -51,7 +51,7 @@ public class SecurityConfig {
                 )
             )
            .authorizeHttpRequests(auth -> auth
-    .requestMatchers("/test-sms").permitAll()   // 👈 ADD THIS LINE
+    .requestMatchers("/test-sms").permitAll()   
     .requestMatchers("/api/auth/**").permitAll()
     .requestMatchers("/api/admin/users/test").permitAll()
     .requestMatchers("/api/admin/**").hasRole("ADMIN")
