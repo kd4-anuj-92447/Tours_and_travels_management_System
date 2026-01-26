@@ -94,6 +94,6 @@ public class AgentPackageController {
             throw new RuntimeException("Maximum 5 images allowed");
         }
 
-        return imageUploadService.uploadImages(images); // ✅ NOW THIS WORKS
+        return imageUploadService.uploadImages(images); // ✅ NOW THIS WORKS!
     }
 }
