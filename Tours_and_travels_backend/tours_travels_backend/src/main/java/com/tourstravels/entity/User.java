@@ -23,7 +23,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    @JsonIgnore
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     /* ================= ROLE ================= */
@@ -39,4 +39,20 @@ public class User {
     private String address;
 
     private String profilePicUrl;
+
+    /* ================= AGENT PROFILE & APPROVAL ================= */
+
+    @Column(length = 150)
+    private String companyName;
+
+    @Column(length = 100)
+    private String licenseNumber;
+
+    private Boolean isApproved; // null/false = pending, true = approved
+
+    @Column(name = "approval_date")
+    private java.time.LocalDateTime approvalDate;
+
+    @Column(length = 100)
+    private String approvedBy; // Admin name who approved
 }

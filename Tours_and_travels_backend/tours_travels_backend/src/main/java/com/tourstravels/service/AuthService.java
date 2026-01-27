@@ -6,11 +6,23 @@ import com.tourstravels.entity.User;
 
 public interface AuthService {
 
-	 User registerCustomer(User user);
+	User registerCustomer(User user);
 
-	    User registerAgent(User user);
+	User registerAgent(User user);
 
-	    User getUserByEmail(String email);
+	User registerAgentPending(User user);
 
-	    List<User> getAllUsers();
+	User getUserByEmail(String email);
+
+	List<User> getAllUsers();
+
+	List<User> getPendingAgents();
+
+	List<User> getApprovedAgents();
+
+	User approveAgent(Long agentId, String adminName);
+
+	void rejectAgent(Long agentId);
+
+	boolean emailExists(String email);
 }

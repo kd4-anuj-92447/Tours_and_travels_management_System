@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTheme } from "./CustomerThemeContext";
 
@@ -13,6 +13,7 @@ const StatusBadge = () => (
 
 const CustomerPackages = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const themeContext = useTheme();
   const { theme } = themeContext || { theme: "day" };
 
@@ -21,6 +22,7 @@ const CustomerPackages = () => {
   const [loadingId, setLoadingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
 
   const backgroundStyle = {
     backgroundImage:
@@ -38,6 +40,15 @@ const CustomerPackages = () => {
   useEffect(() => {
     loadPackages();
   }, []);
+
+  useEffect(() => {
+    // Handle search from URL params
+    const urlSearch = searchParams.get("search");
+    if (urlSearch) {
+      setSearchQuery(urlSearch);
+      handleSearch(urlSearch);
+    }
+  }, [searchParams]);
 
   const loadPackages = async () => {
     try {
@@ -66,20 +77,30 @@ const CustomerPackages = () => {
     }
   };
 
-  /* 🔍 Search from navbar */
+  /* 🔍 Search from navbar - Filter by destination primarily */
   const handleSearch = (query) => {
     if (!query) {
       setFilteredPackages(packages);
+      setSearchQuery("");
       return;
     }
 
-    setFilteredPackages(
-      packages.filter(
-        (pkg) =>
-          pkg.title.toLowerCase().includes(query.toLowerCase()) ||
-          pkg.description.toLowerCase().includes(query.toLowerCase())
-      )
+    const searchTerm = query.toLowerCase();
+    const results = packages.filter(
+      (pkg) =>
+        // Primary search: destination
+        pkg.destination?.toLowerCase().includes(searchTerm) ||
+        // Secondary: title and description
+        pkg.title?.toLowerCase().includes(searchTerm) ||
+        pkg.description?.toLowerCase().includes(searchTerm)
     );
+
+    setFilteredPackages(results);
+    setSearchQuery(query);
+    
+    if (results.length === 0) {
+      toast.info(`No packages found for "${query}"`);
+    }
   };
 
   /* ✅ BOOK NOW – CREATE BOOKING AND NAVIGATE TO PAYMENT */
@@ -227,7 +248,7 @@ const CustomerPackages = () => {
                     <div className="row mb-3 text-center">
                       <div className="col-6">
                         <small className={theme === "night" ? "text-light" : "text-muted"}>Duration</small>
-                        <p className="fw-bold">{pkg.duration || "N/A"} days</p>
+                        <p className="fw-bold">{pkg.duration || "N/A"} </p>
                       </div>
                       <div className="col-6">
                         <small className={theme === "night" ? "text-light" : "text-muted"}>Price</small>
@@ -235,18 +256,26 @@ const CustomerPackages = () => {
                       </div>
                     </div>
 
-                    <button
-                      className="btn btn-primary w-100 mt-auto fw-bold shadow-sm"
-                      disabled={loadingId === pkg.id}
-                      onClick={() => handleBookNow(pkg.id)}
-                    >
-                      {loadingId === pkg.id ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                          Booking...
-                        </>
-                      ) : "🎫 Book Now"}
-                    </button>
+                    <div className="d-grid gap-2">
+                      <button
+                        className="btn btn-outline-primary fw-bold shadow-sm"
+                        onClick={() => navigate(`/customer/packages/${pkg.id}`)}
+                      >
+                        👁️ View Details
+                      </button>
+                      <button
+                        className="btn btn-primary fw-bold shadow-sm"
+                        disabled={loadingId === pkg.id}
+                        onClick={() => handleBookNow(pkg.id)}
+                      >
+                        {loadingId === pkg.id ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+                            Booking...
+                          </>
+                        ) : "🎫 Book Now"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

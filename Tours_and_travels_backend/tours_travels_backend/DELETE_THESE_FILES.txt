@@ -1,9 +1,0 @@
-The following files should be deleted as they duplicate endpoints in AdminController.java:
-
-1. src/main/java/com/tourstravels/controller/admin/AdminBookingController.java
-2. src/main/java/com/tourstravels/controller/admin/AdminPackageController.java
-3. src/main/java/com/tourstravels/controller/admin/AdminPaymentController.java
-4. src/main/java/com/tourstravels/controller/admin/AdminUserController.java
-
-All endpoints are already implemented in:
-- src/main/java/com/tourstravels/controller/AdminController.java

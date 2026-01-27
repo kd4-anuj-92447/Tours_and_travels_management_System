@@ -7,7 +7,6 @@ import com.tourstravels.repository.PaymentRepository;
 import com.tourstravels.repository.UserRepository;
 import com.tourstravels.repository.BookingRepository;
 import com.tourstravels.enums.PaymentStatus;
-import com.tourstravels.enums.BookingStatus;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customer/payments")
@@ -53,7 +54,7 @@ public class CustomerPaymentController {
 
     @PostMapping
     public ResponseEntity<?> createPayment(
-            @RequestBody Payment paymentRequest,
+            @RequestBody Map<String, Object> paymentRequest,
             Authentication auth) {
         
         logger.info("💳 POST /api/customer/payments - createPayment() called");
@@ -61,7 +62,17 @@ public class CustomerPaymentController {
         User customer = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Long bookingId = paymentRequest.getBooking().getId();
+        // Extract bookingId from request
+        Long bookingId = null;
+        if (paymentRequest.get("bookingId") instanceof Number) {
+            bookingId = ((Number) paymentRequest.get("bookingId")).longValue();
+        }
+        
+        if (bookingId == null) {
+            logger.error("❌ Missing bookingId in payment request");
+            return ResponseEntity.badRequest().body("Booking ID is required");
+        }
+
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
@@ -71,18 +82,27 @@ public class CustomerPaymentController {
             return ResponseEntity.status(403).body("Unauthorized access to booking");
         }
 
-        // Create payment
+        // Check if payment already exists for this booking to avoid duplicate entry
+        Optional<Payment> existingPaymentOpt = paymentRepository.findByBooking(booking);
+        if (existingPaymentOpt.isPresent()) {
+            logger.info("⏭️ Payment already exists for Booking ID: {}. Returning existing payment.", bookingId);
+            return ResponseEntity.ok(existingPaymentOpt.get());
+        }
+
+        // Create payment - ALWAYS SUCCESSFUL FOR NOW
         Payment payment = new Payment();
         payment.setBooking(booking);
-        payment.setStatus(PaymentStatus.SUCCESS);  // In real app, integrate with payment gateway
+        payment.setStatus(PaymentStatus.SUCCESS);  // Always mark as SUCCESS
         
         Payment savedPayment = paymentRepository.save(payment);
         
-        // Update booking payment status to SUCCESS after successful payment
+        // Update booking payment status to SUCCESS (Booking status stays PENDING for admin approval)
         booking.setPaymentStatus(PaymentStatus.SUCCESS);
+        // ❌ DON'T change booking status - let admin confirm it manually
         bookingRepository.save(booking);
         
-        logger.info("✅ Payment created successfully. Booking ID: {} payment status updated to SUCCESS", bookingId);
+        logger.info("✅ Payment created successfully. Booking ID: {} - Payment: SUCCESS, Booking Status: {} (awaiting admin confirmation)", 
+                    bookingId, booking.getStatus());
         return ResponseEntity.ok(savedPayment);
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.cors.CorsConfiguration;
+import java.util.logging.Logger;
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -27,6 +29,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
+
+        logger.info("🔐 SecurityConfig: Configuring security filter chain");
 
         http
             .cors(cors -> cors.configurationSource(request -> {
@@ -63,6 +67,7 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class
             );
 
+        logger.info("✅ SecurityConfig: Filter chain configured successfully");
         return http.build();
     }
 

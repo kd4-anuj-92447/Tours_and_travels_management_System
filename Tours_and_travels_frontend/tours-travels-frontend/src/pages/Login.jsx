@@ -11,6 +11,18 @@ const Login = () => {
 
   const navigate = useNavigate();
 
+  const backgroundStyle = {
+    backgroundImage:
+      "linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('https://images.unsplash.com/photo-1503803919419-5f4a06a6d9cf?w=1200&h=600&fit=crop')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  };
+
   const handleLogin = async (e) => {
   e.preventDefault(); // PREVENT FORM SUBMIT RELOAD
 
@@ -36,11 +48,8 @@ const Login = () => {
 };
 
   return (
-    <div
-      className="container d-flex justify-content-center align-items-center"
-      style={{ minHeight: "90vh" }}
-    >
-      <div className="card p-4" style={{ width: "380px" }}>
+    <div style={backgroundStyle}>
+      <div className="card p-4" style={{ width: "380px", backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "10px" }}>
         <h4 className="text-center mb-3">Login</h4>
 
         {/* FORM */}
@@ -71,12 +80,22 @@ const Login = () => {
         {/* REGISTER LINK */}
         <div className="text-center mt-3">
           <span>Don’t have an account? </span>
-          <Link to="/register">Register</Link>
+          <Link to="/register">Register as Customer</Link>
+        </div>
+
+        <hr />
+
+        {/* AGENT REGISTRATION */}
+        <div className="text-center mb-3">
+          <span className="text-muted">Are you a travel agent? </span>
+          <Link to="/agent-register" className="fw-bold">
+            Register here
+          </Link>
         </div>
 
         {/* OPTIONAL INFO */}
         <p className="text-muted text-center mt-2" style={{ fontSize: "13px" }}>
-          Agents and Admins login using system-provided credentials.
+          Admins login using system-provided credentials.
         </p>
       </div>
     </div>

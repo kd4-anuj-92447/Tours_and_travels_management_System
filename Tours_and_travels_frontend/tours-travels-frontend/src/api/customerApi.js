@@ -16,6 +16,22 @@ export const getPackageByIdCustomerApi = (packageId) => {
   return axios.get(`/customer/packages/${packageId}`);
 };
 
+/**
+ * Search packages by destination or title
+ */
+export const searchPackagesApi = (query) => {
+  return axios.get(`/customer/packages/search`, {
+    params: { q: query }
+  });
+};
+
+/**
+ * Get packages by destination
+ */
+export const getPackagesByDestinationApi = (destination) => {
+  return axios.get(`/customer/packages/destination/${destination}`);
+};
+
 /* ================= BOOKINGS ================= */
 
 /**

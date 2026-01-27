@@ -21,6 +21,15 @@ export const registerCustomerApi = (user) => {
 };
 
 /**
+ * AGENT REGISTRATION (PUBLIC)
+ * POST /api/auth/register-agent
+ * Requires admin approval before agent can access system
+ */
+export const registerAgentApi = (agentData) => {
+  return axiosInstance.post("/auth/register-agent", agentData);
+};
+
+/**
  * LOGOUT (frontend only)
  */
 export const logoutApi = () => {

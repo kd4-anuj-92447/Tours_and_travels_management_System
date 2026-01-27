@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
   getAllPaymentsAdminApi,
-  confirmPaymentAdminApi
+  confirmPaymentAdminApi,
+  refundPaymentAdminApi
 } from "../api/adminApi";
 
 const ManagePayments = () => {
@@ -42,7 +43,39 @@ const ManagePayments = () => {
     }
   };
 
-  if (loading) {
+  const refundPayment = async (id) => {
+    if (!window.confirm("Are you sure you want to refund this payment?")) {
+      return;
+    }
+    try {
+      setLoading(true);
+      await refundPaymentAdminApi(id);
+      toast.success("Payment refunded successfully");
+      await loadPayments();
+    } catch (error) {
+      console.error("Error refunding payment:", error);
+      toast.error(error.response?.data?.message || "Failed to refund payment");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "PENDING":
+        return <span className="badge bg-warning text-dark">Pending</span>;
+      case "SUCCESS":
+        return <span className="badge bg-success">Success</span>;
+      case "REFUNDED":
+        return <span className="badge bg-info">Refunded</span>;
+      case "FAILED":
+        return <span className="badge bg-danger">Failed</span>;
+      default:
+        return <span className="badge bg-secondary">{status}</span>;
+    }
+  };
+
+  if (loading && payments.length === 0) {
     return (
       <div className="text-center mt-5">
         <div className="spinner-border text-primary" />
@@ -52,14 +85,14 @@ const ManagePayments = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Manage Payments</h2>
+      <h2>💳 Manage Payments</h2>
 
       {payments.length === 0 ? (
         <div className="alert alert-info mt-3">
           No payments found in the system.
         </div>
       ) : (
-        <table className="table table-bordered mt-3">
+        <table className="table table-bordered mt-3 table-hover">
           <thead className="table-dark">
             <tr>
               <th>ID</th>
@@ -67,30 +100,36 @@ const ManagePayments = () => {
               <th>Customer</th>
               <th>Amount</th>
               <th>Status</th>
-              <th>Action</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {payments.map((p) => (
               <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.booking?.id || p.bookingId}</td>
+                <td>#{p.id}</td>
+                <td>#{p.booking?.id || p.bookingId}</td>
                 <td>{p.booking?.user?.name || "N/A"}</td>
                 <td>₹ {p.booking?.amount || p.amount || "0"}</td>
-                <td>
-                  <span className={`badge bg-${p.status === "PENDING" ? "warning" : p.status === "SUCCESS" ? "success" : "secondary"}`}>
-                    {p.status}
-                  </span>
-                </td>
+                <td>{getStatusBadge(p.status)}</td>
                 <td>
                   {p.status === "PENDING" ? (
+                    <>
+                      <button
+                        className="btn btn-success btn-sm me-2"
+                        onClick={() => confirmPayment(p.id)}
+                        disabled={loading}
+                      >
+                        ✓ Confirm
+                      </button>
+                    </>
+                  ) : p.status === "SUCCESS" ? (
                     <button
-                      className="btn btn-success btn-sm"
-                      onClick={() => confirmPayment(p.id)}
+                      className="btn btn-warning btn-sm"
+                      onClick={() => refundPayment(p.id)}
                       disabled={loading}
                     >
-                      Confirm
+                      ↩ Refund
                     </button>
                   ) : (
                     <span className="text-muted">—</span>

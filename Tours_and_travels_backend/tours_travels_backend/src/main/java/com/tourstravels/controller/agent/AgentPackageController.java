@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/agent/packages")
@@ -20,6 +21,7 @@ public class AgentPackageController {
     private final PackageRepository packageRepository;
     private final UserRepository userRepository;
     private final ImageUploadService imageUploadService;
+    private static final Logger logger = Logger.getLogger(AgentPackageController.class.getName());
 
     public AgentPackageController(
             PackageRepository packageRepository,
@@ -37,12 +39,14 @@ public class AgentPackageController {
             @RequestBody TravelPackage tourPackage,
             @AuthenticationPrincipal String email
     ) {
+        logger.info("📦 POST /agent/packages - createPackage() called with email: " + email);
         User agent = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
         tourPackage.setAgent(agent);
         tourPackage.setStatus(PackageStatus.PENDING);
 
+        logger.info("✅ Package created: " + tourPackage.getTitle());
         return packageRepository.save(tourPackage);
     }
 
@@ -86,14 +90,76 @@ public class AgentPackageController {
         return packageRepository.findByAgent(agent);
     }
     
-    @PostMapping("/upload-images")
-    public List<String> uploadPackageImages(
+    @PostMapping("/{id}/upload-images")
+    public TravelPackage uploadPackageImages(
+            @PathVariable Long id,
             @RequestParam("images") MultipartFile[] images
     ) {
+        TravelPackage pkg = packageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Package not found"));
+
         if (images.length > 5) {
             throw new RuntimeException("Maximum 5 images allowed");
         }
 
-        return imageUploadService.uploadImages(images); // ✅ NOW THIS WORKS
+        // Upload images and get URLs
+        List<String> uploadedUrls = imageUploadService.uploadImages(images);
+
+        // Initialize imageUrls if null
+        if (pkg.getImageUrls() == null) {
+            pkg.setImageUrls(new java.util.ArrayList<>());
+        }
+
+        // Add uploaded URLs to package
+        pkg.getImageUrls().addAll(uploadedUrls);
+
+        return packageRepository.save(pkg);
+    }
+
+    /* ADD PACKAGE IMAGES VIA URLS */
+    @PostMapping("/{id}/image-urls")
+    public TravelPackage addPackageImageUrls(
+            @PathVariable Long id,
+            @RequestBody ImageUrlRequest request
+    ) {
+        TravelPackage pkg = packageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Package not found"));
+
+        if (request.getImageUrls() == null || request.getImageUrls().isEmpty()) {
+            throw new RuntimeException("At least one image URL is required");
+        }
+
+        if (request.getImageUrls().size() > 5) {
+            throw new RuntimeException("Maximum 5 images allowed");
+        }
+
+        // Initialize imageUrls if null
+        if (pkg.getImageUrls() == null) {
+            pkg.setImageUrls(new java.util.ArrayList<>());
+        }
+
+        // Add URLs to package
+        pkg.getImageUrls().addAll(request.getImageUrls());
+
+        return packageRepository.save(pkg);
+    }
+}
+
+// DTO for image URL request
+class ImageUrlRequest {
+    private List<String> imageUrls;
+
+    public ImageUrlRequest() {}
+
+    public ImageUrlRequest(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
     }
 }

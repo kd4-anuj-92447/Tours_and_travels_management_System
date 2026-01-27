@@ -28,6 +28,9 @@ public class TravelPackage {
     @Column(nullable = false)
     private Double price;
 
+    @Column(length = 100)
+    private String duration;
+
     /* ================= STATUS ================= */
 
     @Enumerated(EnumType.STRING)
@@ -47,7 +50,7 @@ public class TravelPackage {
         name = "package_images",
         joinColumns = @JoinColumn(name = "package_id")
     )
-    @Column(name = "image_url")
+    @Column(name = "image_url", nullable = true)
     private List<String> imageUrls;
 
     /* ================= TRANSIENT PROPERTIES FOR API ================= */

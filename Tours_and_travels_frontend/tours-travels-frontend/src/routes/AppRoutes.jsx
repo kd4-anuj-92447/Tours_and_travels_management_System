@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import AgentRegister from "../pages/AgentRegister";
 import Unauthorized from "../pages/Unauthorized";
 
 /* ========== Layouts ========== */
@@ -15,17 +16,22 @@ import ManageBookings from "../admin/ManageBookings";
 import ManageAdminPackages from "../admin/ManageAdminPackages";
 import ManagePayments from "../admin/ManagePayments";
 import ManageUsers from "../admin/ManageUsers";
+import ManageAgentRegistrations from "../admin/ManageAgentRegistrations";
 
 /* ========== Agent Pages ========== */
 import AgentDashboard from "../agent/AgentDashboard";
 import AgentPackages from "../agent/AgentPackages";
 import AgentBookings from "../agent/AgentBookings";
+import CreatePackage from "../agent/CreatePackage";
+import EditPackage from "../agent/EditPackage";
 
 /* ========== Customer Pages ========== */
 import CustomerDashboard from "../customer/CustomerDashboard";
 import CustomerPackages from "../customer/CustomerPackages";
 import CustomerBookings from "../customer/CustomerBookings";
 import CustomerProfile from "../customer/CustomerProfile";
+import CustomerSearchResults from "../customer/CustomerSearchResults";
+import PackageDetails from "../customer/PackageDetails";
 import Payment from "../customer/Payment";
 
 /* ========== Auth Utils ========== */
@@ -51,6 +57,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/agent-register" element={<AgentRegister />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
 
       {/* ================= ADMIN ================= */}
@@ -94,6 +101,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/agent-registrations"
+        element={
+          <ProtectedRoute role="ADMIN">
+            <ManageAgentRegistrations />
+          </ProtectedRoute>
+        }
+      />
 
       {/* ================= AGENT ================= */}
       <Route
@@ -120,6 +135,22 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/agent/create-package"
+        element={
+          <ProtectedRoute role="AGENT">
+            <CreatePackage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/agent/edit-package/:id"
+        element={
+          <ProtectedRoute role="AGENT">
+            <EditPackage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* ================= CUSTOMER ================= */}
       <Route
@@ -132,9 +163,11 @@ const AppRoutes = () => {
       >
         <Route index element={<CustomerDashboard />} />
         <Route path="packages" element={<CustomerPackages />} />
+        <Route path="packages/:packageId" element={<PackageDetails />} />
         <Route path="bookings" element={<CustomerBookings />} />
         <Route path="payment/:bookingId" element={<Payment />} />
         <Route path="profile" element={<CustomerProfile />} />
+        <Route path="search-results" element={<CustomerSearchResults />} />
       </Route>
 
       {/* ================= FALLBACK ================= */}

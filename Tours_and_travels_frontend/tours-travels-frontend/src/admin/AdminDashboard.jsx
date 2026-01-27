@@ -9,6 +9,7 @@ import {
   getAllUsersApi,
   cancelBookingByAdmin,
   confirmBookingAdminApi,
+  getPaymentStatsAdminApi,
 } from "../api/adminApi";
 
 import { getUserRole, logout } from "../utils/auth";
@@ -23,13 +24,19 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [payments, setPayments] = useState([]);
   const [users, setUsers] = useState([]);
+  const [paymentStats, setPaymentStats] = useState({
+    pendingPayments: 0,
+    successPayments: 0,
+    refundedPayments: 0,
+    totalPayments: 0,
+  });
   const [loading, setLoading] = useState(false);
 
   const backgroundStyle = {
     backgroundImage:
       theme === "night"
-        ? "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop')"
-        : "linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=600&fit=crop')",
+        ? "linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop')"
+        : "linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=600&fit=crop')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",
@@ -55,17 +62,25 @@ const AdminDashboard = () => {
         bookingRes,
         paymentRes,
         userRes,
+        statsRes,
       ] = await Promise.all([
         getPendingPackagesAdminApi(),
         getAllBookingsAdminApi(),
         getAllPaymentsAdminApi(),
         getAllUsersApi(),
+        getPaymentStatsAdminApi(),
       ]);
 
       setPendingPackages(pendingPkgRes.data || []);
       setBookings(bookingRes.data || []);
       setPayments(paymentRes.data || []);
       setUsers(userRes.data || []);
+      setPaymentStats(statsRes.data || {
+        pendingPayments: 0,
+        successPayments: 0,
+        refundedPayments: 0,
+        totalPayments: 0,
+      });
 
     } catch (error) {
       console.error("Admin dashboard load failed", error);
@@ -187,8 +202,8 @@ const AdminDashboard = () => {
             },
             {
               title: "Pending Payments",
-              count: bookings.filter(b => b.paymentStatus !== "PAID").length,
-              path: "/admin/manage-bookings",
+              count: paymentStats.pendingPayments,
+              path: "/admin/manage-payments",
               color: "danger",
               icon: "💳",
             },
@@ -201,7 +216,7 @@ const AdminDashboard = () => {
             },
             {
               title: "Total Payments",
-              count: payments.length,
+              count: paymentStats.totalPayments,
               path: "/admin/manage-payments",
               color: "info",
               icon: "💰",
@@ -212,6 +227,13 @@ const AdminDashboard = () => {
               path: "/admin/manage-users",
               color: "primary",
               icon: "👥",
+            },
+            {
+              title: "Agent Registrations",
+              count: users.filter(u => u.role?.roleName === "AGENT" && !u.isApproved).length,
+              path: "/admin/agent-registrations",
+              color: "warning",
+              icon: "📋",
             },
           ].map((card, idx) => (
             <div className="col-lg-2 col-md-4 col-sm-6 mb-3" key={idx}>

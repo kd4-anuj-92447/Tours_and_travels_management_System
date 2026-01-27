@@ -47,6 +47,29 @@ export const confirmPaymentAdminApi = (paymentId) => {
   return axios.put(`/admin/payments/confirm/${paymentId}`);
 };
 
+export const refundPaymentAdminApi = (paymentId) => {
+  return axios.put(`/admin/payments/refund/${paymentId}`);
+};
+
+export const getPaymentStatsAdminApi = () => {
+  return axios.get("/admin/payments/stats");
+};
+
+/* ================= AGENT REGISTRATION MANAGEMENT ================= */
+export const getAgentRegistrationsApi = () => {
+  return axios.get("/admin/agents/registrations");
+};
+
+export const approveAgentApi = (agentId) => {
+  return axios.put(`/admin/agents/approve/${agentId}`, { 
+    adminName: localStorage.getItem("userName") || "Admin User"
+  });
+};
+
+export const rejectAgentApi = (agentId, reason = "") => {
+  return axios.put(`/admin/agents/reject/${agentId}`, { reason });
+};
+
 export const getToken = () => {
   return localStorage.getItem("token");
 };

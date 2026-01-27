@@ -2,40 +2,46 @@ import axios from "./axiosInstance";
 
 /* ================= AGENT PACKAGES ================= */
 
-// ✅ Agent → View own packages
+//  Agent → View own packages
 export const getMyPackagesApi = () =>
-  axios.get("/api/agent/packages");
+  axios.get("/agent/packages");
 
-// ✅ Agent → Create package
+//  Agent → Create package
 export const createPackageApi = (data) =>
-  axios.post("/api/agent/packages", data);
+  axios.post("/agent/packages", data);
 
-// ✅ Agent → Update package
+//  Agent → Update package
 export const updatePackageApi = (id, data) =>
-  axios.put(`/api/agent/packages/${id}`, data);
+  axios.put(`/agent/packages/${id}`, data);
 
-// ✅ Agent → Request delete (PENDING_DELETE)
+//  Agent → Request delete (PENDING_DELETE)
 export const deletePackageApi = (id) =>
-  axios.delete(`/api/agent/packages/${id}`);
+  axios.delete(`/agent/packages/${id}`);
 
-// ✅ Agent → Upload images
-export const uploadPackageImagesApi = (files) => {
+//  Agent → Upload images (File upload)
+export const uploadPackageImagesApi = (packageId, files) => {
   const formData = new FormData();
   files.forEach((file) => formData.append("images", file));
 
-  return axios.post("/api/agent/packages/upload-images", formData, {
+  return axios.post(`/agent/packages/${packageId}/upload-images`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
 };
 
+// ✅ Agent → Add package images via URLs (Direct URL submission)
+export const addPackageImageUrlsApi = (packageId, imageUrls) =>
+  axios.post(`/agent/packages/${packageId}/image-urls`, {
+    imageUrls,
+  });
+
 /* ================= AGENT BOOKINGS ================= */
 
 export const getAgentBookingsApi = () =>
-  axios.get("/api/agent/bookings");
+  axios.get("/agent/bookings");
 
 export const updateBookingStatusApi = (bookingId, decision) =>
-  axios.put(`/api/agent/bookings/${bookingId}`, {
+  axios.put(`/agent/bookings/${bookingId}`, {
     decision,
   });

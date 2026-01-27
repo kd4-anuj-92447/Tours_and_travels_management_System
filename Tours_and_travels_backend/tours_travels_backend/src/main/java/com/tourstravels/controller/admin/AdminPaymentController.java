@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/payments")
@@ -52,6 +54,37 @@ public class AdminPaymentController {
         paymentRepository.save(payment);
         logger.info("✅ Payment ID {} refunded successfully", id);
         return ResponseEntity.ok("Payment refunded");
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<?> getPaymentStats() {
+        logger.info("📊 GET /api/admin/payments/stats - getPaymentStats() called");
+        List<Payment> allPayments = paymentRepository.findAll();
+        
+        long pendingCount = allPayments.stream()
+                .filter(p -> p.getStatus() == PaymentStatus.PENDING)
+                .count();
+        long successCount = allPayments.stream()
+                .filter(p -> p.getStatus() == PaymentStatus.SUCCESS)
+                .count();
+        long refundedCount = allPayments.stream()
+                .filter(p -> p.getStatus() == PaymentStatus.REFUNDED)
+                .count();
+        long failedCount = allPayments.stream()
+                .filter(p -> p.getStatus() == PaymentStatus.FAILED)
+                .count();
+        
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("pendingPayments", pendingCount);
+        stats.put("successPayments", successCount);
+        stats.put("refundedPayments", refundedCount);
+        stats.put("failedPayments", failedCount);
+        stats.put("totalPayments", allPayments.size());
+        
+        logger.info("✅ Payment stats - Pending: {}, Success: {}, Refunded: {}, Failed: {}, Total: {}", 
+                pendingCount, successCount, refundedCount, failedCount, allPayments.size());
+        
+        return ResponseEntity.ok(stats);
     }
 }
 

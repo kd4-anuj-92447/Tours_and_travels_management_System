@@ -7,6 +7,8 @@ import {
 
 const CustomerProfile = () => {
   const [loading, setLoading] = useState(false);
+  const [pictureMode, setPictureMode] = useState("file"); // "file" or "url"
+  const [currentPictureUrl, setCurrentPictureUrl] = useState("");
 
   const [profile, setProfile] = useState({
     username: "",
@@ -51,6 +53,25 @@ const CustomerProfile = () => {
     reader.readAsDataURL(file);
   };
 
+  const handlePictureUrlChange = (url) => {
+    if (!url.trim()) {
+      toast.error("Please enter a valid URL");
+      return;
+    }
+    setCurrentPictureUrl(url);
+  };
+
+  const applyPictureUrl = () => {
+    if (currentPictureUrl.trim()) {
+      setProfile((prev) => ({
+        ...prev,
+        profilePic: currentPictureUrl,
+      }));
+      setCurrentPictureUrl("");
+      toast.success("Picture URL added");
+    }
+  };
+
   /* ================= SAVE PROFILE ================= */
   const handleSave = async () => {
     try {
@@ -91,14 +112,69 @@ const CustomerProfile = () => {
               width="120"
               height="120"
               style={{ objectFit: "cover" }}
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/120";
+              }}
             />
 
-            <input
-              type="file"
-              className="form-control mt-2"
-              accept="image/*"
-              onChange={handlePicUpload}
-            />
+            {/* Picture Mode Toggle */}
+            <div className="btn-group d-flex mt-2" role="group" style={{ justifyContent: "center" }}>
+              <input
+                type="radio"
+                className="btn-check"
+                name="pictureMode"
+                id="modePictureFile"
+                value="file"
+                checked={pictureMode === "file"}
+                onChange={(e) => setPictureMode(e.target.value)}
+              />
+              <label className="btn btn-outline-primary btn-sm" htmlFor="modePictureFile">
+                📤 Upload
+              </label>
+
+              <input
+                type="radio"
+                className="btn-check"
+                name="pictureMode"
+                id="modePictureUrl"
+                value="url"
+                checked={pictureMode === "url"}
+                onChange={(e) => setPictureMode(e.target.value)}
+              />
+              <label className="btn btn-outline-primary btn-sm" htmlFor="modePictureUrl">
+                🔗 URL
+              </label>
+            </div>
+
+            {/* FILE UPLOAD MODE */}
+            {pictureMode === "file" && (
+              <input
+                type="file"
+                className="form-control mt-2"
+                accept="image/*"
+                onChange={handlePicUpload}
+              />
+            )}
+
+            {/* URL INPUT MODE */}
+            {pictureMode === "url" && (
+              <div className="input-group mt-2">
+                <input
+                  type="url"
+                  className="form-control form-control-sm"
+                  placeholder="https://example.com/picture.jpg"
+                  value={currentPictureUrl}
+                  onChange={(e) => handlePictureUrlChange(e.target.value)}
+                />
+                <button
+                  className="btn btn-outline-primary btn-sm"
+                  type="button"
+                  onClick={applyPictureUrl}
+                >
+                  Apply
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Username */}
