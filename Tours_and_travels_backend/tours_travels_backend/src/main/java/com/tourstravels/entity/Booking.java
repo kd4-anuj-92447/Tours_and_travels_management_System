@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class Booking {
 
     @Id
@@ -65,4 +67,7 @@ public class Booking {
                 ? tourPackage.getAgent().getUserId()
                 : null;
     }
+
+	
+
 }

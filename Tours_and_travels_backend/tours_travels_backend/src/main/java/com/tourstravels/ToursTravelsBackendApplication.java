@@ -10,5 +10,6 @@ public class ToursTravelsBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(ToursTravelsBackendApplication.class, args);
         System.out.println("✅ Tours and Travels Backend started successfully!");
+        
     }
 }

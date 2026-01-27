@@ -2,7 +2,11 @@ package com.tourstravels.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "users")
@@ -55,4 +59,8 @@ public class User {
 
     @Column(length = 100)
     private String approvedBy; // Admin name who approved
+    
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<TravelPackage> packages;
 }

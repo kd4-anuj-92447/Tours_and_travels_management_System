@@ -7,7 +7,9 @@ import com.tourstravels.repository.PackageRepository;
 import com.tourstravels.repository.UserRepository;
 import com.tourstravels.service.ImageUploadService;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,13 +17,14 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @RestController
-@RequestMapping("/agent/packages")
+@RequestMapping("/api/agent/packages")
 public class AgentPackageController {
 
     private final PackageRepository packageRepository;
     private final UserRepository userRepository;
     private final ImageUploadService imageUploadService;
-    private static final Logger logger = Logger.getLogger(AgentPackageController.class.getName());
+    private static final Logger logger =
+            Logger.getLogger(AgentPackageController.class.getName());
 
     public AgentPackageController(
             PackageRepository packageRepository,
@@ -37,18 +40,22 @@ public class AgentPackageController {
     @PostMapping
     public TravelPackage createPackage(
             @RequestBody TravelPackage tourPackage,
-            @AuthenticationPrincipal String email
+            Authentication authentication
     ) {
-        logger.info("📦 POST /agent/packages - createPackage() called with email: " + email);
+        logger.info("AUTH NAME = " + authentication.getName());
+
+        String email = authentication.getName();
+
         User agent = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Agent not found"));
+                .orElseThrow(() -> new RuntimeException("Agent not found: " + email));
 
         tourPackage.setAgent(agent);
         tourPackage.setStatus(PackageStatus.PENDING);
 
-        logger.info("✅ Package created: " + tourPackage.getTitle());
         return packageRepository.save(tourPackage);
     }
+
+
 
     /* EDIT PACKAGE */
     @PutMapping("/{id}")

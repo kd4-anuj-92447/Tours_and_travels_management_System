@@ -1,6 +1,8 @@
 package com.tourstravels.entity;
 
 import com.tourstravels.enums.PackageStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,6 +43,7 @@ public class TravelPackage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agent_id", nullable = false)
+    @JsonBackReference
     private User agent;
 
     /* ================= IMAGES ================= */

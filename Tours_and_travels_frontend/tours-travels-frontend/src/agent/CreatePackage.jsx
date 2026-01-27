@@ -55,60 +55,56 @@ const CreatePackage = () => {
   /* ================= SUBMIT ================= */
 
   const submit = async () => {
-    if (!form.title || !form.destination || !form.description || !form.price || !form.duration) {
-      toast.error("All fields are required");
-      return;
+  if (!form.title || !form.destination || !form.description || !form.price || !form.duration) {
+    toast.error("All fields are required");
+    return;
+  }
+
+  if (imageMode === "file" && files.length === 0) {
+    toast.error("Please select at least one image");
+    return;
+  }
+
+  if (imageMode === "url" && imageUrls.length === 0) {
+    toast.error("Please add at least one image URL");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const payload = {
+      ...form,
+      price: Number(form.price),
+      status: "PENDING"
+    };
+
+    const pkgRes = await createPackageApi(payload);
+
+    const packageId = pkgRes.data.id; // ✅ FIX
+
+    if (!packageId) {
+      throw new Error("Package ID not returned from server");
     }
 
-    // Check if at least one image source is provided
-    if (imageMode === "file" && files.length === 0) {
-      toast.error("Please select at least one image");
-      return;
+    if (imageMode === "file") {
+      await uploadPackageImagesApi(packageId, files);
+    } else {
+      await addPackageImageUrlsApi(packageId, imageUrls);
     }
 
-    if (imageMode === "url" && imageUrls.length === 0) {
-      toast.error("Please add at least one image URL");
-      return;
-    }
+    toast.success("Package submitted for admin approval!");
 
-    try {
-      setLoading(true);
+    navigate("/agent/packages");
 
-      // 1️⃣ Create package (PENDING)
-      const pkgRes = await createPackageApi(form);
-      const packageId = pkgRes.data.id;
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Failed to create package");
+  } finally {
+    setLoading(false);
+  }
+};
 
-      // 2️⃣ Upload images based on mode
-      if (imageMode === "file") {
-        await uploadPackageImagesApi(packageId, files);
-      } else {
-        await addPackageImageUrlsApi(packageId, imageUrls);
-      }
-
-      toast.success("Package submitted for admin approval!", {
-        autoClose: 2000,
-      });
-
-      // Reset form
-      setForm({ title: "", destination: "", description: "", price: "", duration: "" });
-      setFiles([]);
-      setPreviewUrls([]);
-      setImageUrls([]);
-      setCurrentUrl("");
-      setImageMode("file");
-
-      // Navigate to agent packages after 2 seconds
-      setTimeout(() => {
-        navigate("/agent/packages");
-      }, 2000);
-
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to create package");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /* ================= UI ================= */
 
