@@ -3,10 +3,12 @@ package com.tourstravels.controller.agent;
 import com.tourstravels.entity.TravelPackage;
 import com.tourstravels.entity.User;
 import com.tourstravels.enums.PackageStatus;
+import com.tourstravels.repository.BookingRepository;
 import com.tourstravels.repository.PackageRepository;
 import com.tourstravels.repository.UserRepository;
 import com.tourstravels.service.ImageUploadService;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -75,27 +77,49 @@ public class AgentPackageController {
     }
 
     /* DELETE REQUEST */
-    @PutMapping("/delete/{id}")
-    public String requestDelete(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePackage(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        User agent = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Agent not found"));
+
         TravelPackage pkg = packageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Package not found"));
 
-        pkg.setStatus(PackageStatus.PENDING);
-        packageRepository.save(pkg);
+        // Ownership check
+        if (!pkg.getAgent().getUserId().equals(agent.getUserId())) {
+            return ResponseEntity.status(403)
+                    .body("You are not allowed to delete this package");
+        }
 
-        return "Delete request sent for approval";
+        // ✅ SAFE booking check
+        if (BookingRepository.existsByTourPackageId(id)) {
+            return ResponseEntity.badRequest()
+                    .body("Cannot delete package with existing bookings");
+        }
+
+        packageRepository.delete(pkg);
+        return ResponseEntity.ok("Package deleted successfully");
     }
+
+
 
     /* VIEW OWN PACKAGES */
     @GetMapping
-    public List<TravelPackage> getMyPackages(
-            @AuthenticationPrincipal String email
-    ) {
+    public List<TravelPackage> getMyPackages(Authentication authentication) {
+
+        String email = authentication.getName();
+
         User agent = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
         return packageRepository.findByAgent(agent);
     }
+
     
     @PostMapping("/{id}/upload-images")
     public TravelPackage uploadPackageImages(

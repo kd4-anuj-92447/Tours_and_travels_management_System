@@ -126,29 +126,32 @@ const ManageBookings = () => {
                   </span>
                 </td>
                 <td>
-                  {b.status === "PENDING" && b.paymentStatus === "PAID" && (
-                    <>
-                      <button
-                        className="btn btn-success btn-sm me-2"
-                        onClick={() => confirmBooking(b.id)}
-                        disabled={loading}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleCancelBooking(b.id)}
-                        disabled={loading}
-                      >
-                        Reject
-                      </button>
-                    </>
+                  {b.status === "PENDING" && b.paymentStatus === "SUCCESS" && (
+                  <>
+                  <button
+                    className="btn btn-success btn-sm me-2"
+                    onClick={() => confirmBooking(b.id)}
+                    disabled={loading}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleCancelBooking(b.id)}
+                    disabled={loading}
+                  >
+                    Reject
+                  </button>
+                  </>
                   )}
-                  {b.status === "PENDING" && b.paymentStatus !== "PAID" && (
-                    <span className="text-muted small">Awaiting Payment</span>
-                  )}
-                  {b.status !== "PENDING" && <span className="text-muted">—</span>}
-                </td>
+
+                {b.status === "PENDING" && b.paymentStatus !== "SUCCESS" && (
+                <span className="text-muted small">Awaiting Payment</span>
+                 )}
+
+              { b.status !== "PENDING" && <span className="text-muted">—</span>}
+              </td>
+
               </tr>
             ))}
           </tbody>

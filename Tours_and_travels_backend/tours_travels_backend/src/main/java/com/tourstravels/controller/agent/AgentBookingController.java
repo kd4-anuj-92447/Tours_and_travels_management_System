@@ -35,12 +35,18 @@ public class AgentBookingController {
 
     @GetMapping
     public List<Booking> getMyBookings(Authentication auth) {
+
         logger.info("📋 GET /api/agent/bookings - getMyBookings() called");
+
         User agent = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
-        List<Booking> bookings = bookingRepository.findBookingsByAgentId(agent.getUserId());
-        logger.info("✅ Retrieved {} bookings for agent {}", bookings.size(), agent.getEmail());
+        List<Booking> bookings =
+                bookingRepository.findByTourPackageAgentUserId(agent.getUserId());
+
+        logger.info("✅ Retrieved {} bookings for agent {}", 
+                bookings.size(), agent.getEmail());
+
         return bookings;
     }
 

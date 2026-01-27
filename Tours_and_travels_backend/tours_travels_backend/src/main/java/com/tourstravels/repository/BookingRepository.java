@@ -11,12 +11,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // CUSTOMER → My Bookings
     List<Booking> findByUserUserId(Long userId);
 
-    // AGENT → Bookings for agent's packages
-    List<Booking> findByTourPackageAgent(User agent);
-
-	List<Booking> findBookingsByAgentId(Long agentId);
 
     // ADMIN → All bookings with eager loading
     @Query("SELECT DISTINCT b FROM Booking b LEFT JOIN FETCH b.user LEFT JOIN FETCH b.tourPackage tp LEFT JOIN FETCH tp.agent")
     List<Booking> findAllWithDetails();
+
+    
+	List<Booking> findByTourPackageAgentUserId(Long userId);
+	
+	static boolean existsByTourPackageId(Long packageId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

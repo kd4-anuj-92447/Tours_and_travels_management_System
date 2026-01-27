@@ -9,12 +9,16 @@ import lombok.*;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Entity
 @Table(name = "travel_packages")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class TravelPackage {
 
     @Id
@@ -63,4 +67,6 @@ public class TravelPackage {
     public String getAgentName() {
         return agent != null ? agent.getName() : "N/A";
     }
+
+	
 }

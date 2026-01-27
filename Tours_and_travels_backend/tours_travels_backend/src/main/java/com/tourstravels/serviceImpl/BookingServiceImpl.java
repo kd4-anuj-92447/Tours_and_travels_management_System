@@ -68,6 +68,8 @@ public class BookingServiceImpl implements BookingService {
 
         return bookingRepository.save(booking);
     }
+    
+    //-------Cancel Booking by Customer------
 
     @Override
     public Booking cancelByCustomer(Long bookingId, Long customerId) {
@@ -75,17 +77,26 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
+        // Ownership check
         if (!booking.getUser().getUserId().equals(customerId)) {
-            throw new RuntimeException("Unauthorized cancellation");
+            throw new RuntimeException("Unauthorized cancellation attempt");
         }
 
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new RuntimeException("Only PENDING bookings can be cancelled");
+        // Already cancelled
+        if (booking.getStatus().name().contains("CANCELLED")) {
+            throw new RuntimeException("Booking already cancelled");
+        }
+
+        // Payment completed → cannot cancel
+        if (booking.getPaymentStatus() == PaymentStatus.SUCCESS) {
+            throw new RuntimeException("Cannot cancel booking after payment");
         }
 
         booking.setStatus(BookingStatus.CANCELLED_BY_CUSTOMER);
         return bookingRepository.save(booking);
     }
+
+
 
     /* AGENT */
 
@@ -95,7 +106,7 @@ public class BookingServiceImpl implements BookingService {
         User agent = userRepository.findByEmail(agentEmail)
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
-        return bookingRepository.findByTourPackageAgent(agent);
+        return bookingRepository.findByTourPackageAgentUserId(agent.getUserId());
     }
 
     @Override

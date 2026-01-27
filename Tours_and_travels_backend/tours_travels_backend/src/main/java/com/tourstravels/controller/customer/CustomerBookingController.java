@@ -5,6 +5,7 @@ import com.tourstravels.entity.User;
 import com.tourstravels.repository.UserRepository;
 import com.tourstravels.service.BookingService;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -51,25 +52,30 @@ public class CustomerBookingController {
         User customer = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
+        
         return bookingService.getBookingsByUser(customer.getUserId());
     }
 
     /* ================= CANCEL BOOKING ================= */
 
     @PutMapping("/bookings/{id}/cancel")
-    public Booking cancelBooking(
+    public ResponseEntity<?> cancelBooking(
             @PathVariable Long id,
             Authentication auth) {
 
         User customer = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        return bookingService.cancelByCustomer(id, customer.getUserId());
+        try {
+            Booking booking = bookingService.cancelByCustomer(id, customer.getUserId());
+            return ResponseEntity.ok(booking);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 
     /* ================= CUSTOMER PROFILE ================= */
 
-    @GetMapping("/profile")
     public User getProfile(Authentication auth) {
         return userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -78,27 +84,25 @@ public class CustomerBookingController {
     @PutMapping("/profile")
     public User updateProfile(
             @RequestBody User updatedUser,
-            Authentication auth) {
-        
+            Authentication auth
+    ) {
         User customer = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-        
-        if (updatedUser.getName() != null && !updatedUser.getName().isEmpty()) {
+
+        if (updatedUser.getName() != null && !updatedUser.getName().isBlank()) {
             customer.setName(updatedUser.getName());
         }
-        
-        if (updatedUser.getPhone() != null && !updatedUser.getPhone().isEmpty()) {
+        if (updatedUser.getPhone() != null && !updatedUser.getPhone().isBlank()) {
             customer.setPhone(updatedUser.getPhone());
         }
-        
-        if (updatedUser.getAddress() != null && !updatedUser.getAddress().isEmpty()) {
+        if (updatedUser.getAddress() != null && !updatedUser.getAddress().isBlank()) {
             customer.setAddress(updatedUser.getAddress());
         }
-        
-        if (updatedUser.getProfilePicUrl() != null && !updatedUser.getProfilePicUrl().isEmpty()) {
+        if (updatedUser.getProfilePicUrl() != null &&
+            !updatedUser.getProfilePicUrl().isBlank()) {
             customer.setProfilePicUrl(updatedUser.getProfilePicUrl());
         }
-        
+
         return userRepository.save(customer);
     }
 }

@@ -15,8 +15,12 @@ export const updatePackageApi = (id, data) =>
   axios.put(`/agent/packages/${id}`, data);
 
 //  Agent → Request delete (PENDING_DELETE)
-export const deletePackageApi = (id) =>
-  axios.delete(`/agent/packages/delete/${id}`);
+// agentApi.js
+export const deletePackageApi = (id) => {
+  console.log("Deleting package with ID:", id);
+  return axios.delete(`/agent/packages/${id}`);
+};
+
 
 //  Agent → Upload images (File upload)
 export const uploadPackageImagesApi = (packageId, files) => {

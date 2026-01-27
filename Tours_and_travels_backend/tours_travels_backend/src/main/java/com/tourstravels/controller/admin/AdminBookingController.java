@@ -35,21 +35,28 @@ public class AdminBookingController {
 
     @PutMapping("/confirm/{id}")
     public ResponseEntity<?> confirmBooking(@PathVariable Long id) {
+
         logger.info("✅ PUT /api/admin/bookings/confirm/{} - confirmBooking() called", id);
+
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
-        
-        // Check if payment is completed before approving
+
+        // ✅ Payment must be successful
         if (booking.getPaymentStatus() != PaymentStatus.SUCCESS) {
             logger.warn("❌ Booking ID {} cannot be confirmed. Payment status: {}", id, booking.getPaymentStatus());
-            return ResponseEntity.badRequest().body("Payment must be completed before confirming booking");
+            return ResponseEntity.badRequest()
+                    .body("Payment must be completed before confirming booking");
         }
-        
+
+        // ✅ THIS IS THE CORRECT FIELD
         booking.setStatus(BookingStatus.CONFIRMED);
+
         bookingRepository.save(booking);
+
         logger.info("✅ Booking ID {} confirmed successfully", id);
         return ResponseEntity.ok("Booking confirmed");
     }
+
 
     @PutMapping("/cancel/{id}")
     public ResponseEntity<?> cancelBooking(@PathVariable Long id) {

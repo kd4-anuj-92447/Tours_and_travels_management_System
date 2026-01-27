@@ -39,11 +39,24 @@ const AgentPackages = () => {
   };
 
   const requestDelete = async (id) => {
-    if (!window.confirm("Request delete for this package?")) return;
+  console.log("Delete clicked for package:", id);
+
+  if (!window.confirm("This will permanently delete the package. Continue?")) {
+    return;
+  }
+
+  try {
     await deletePackageApi(id);
-    toast.info("Delete request sent to admin");
-    loadPackages();
-  };
+    toast.success("Package deleted successfully");
+    await loadPackages();
+  } catch (error) {
+    console.error("Delete error:", error);
+    toast.error(
+      error.response?.data || "Failed to delete package"
+    );
+  }
+};
+
 
   return (
     <div className="container mt-4">
