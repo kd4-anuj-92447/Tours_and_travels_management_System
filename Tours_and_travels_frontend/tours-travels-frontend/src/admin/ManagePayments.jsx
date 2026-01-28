@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import {
   getAllPaymentsAdminApi,
@@ -25,7 +25,11 @@ const ManagePayments = () => {
     }
   };
 
-  useEffect(() => {
+  const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
     loadPayments();
   }, []);
 

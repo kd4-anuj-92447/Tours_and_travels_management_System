@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTheme } from "./CustomerThemeContext";
@@ -37,7 +37,11 @@ const CustomerPackages = () => {
     paddingBottom: "2rem",
   };
 
-  useEffect(() => {
+ const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
     loadPackages();
   }, []);
 

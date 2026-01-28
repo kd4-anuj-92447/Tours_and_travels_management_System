@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   getMyPackagesApi,
   deletePackageApi,
@@ -25,7 +25,11 @@ const AgentPackages = () => {
   const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
 
-  useEffect(() => {
+  const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
     loadPackages();
   }, []);
 

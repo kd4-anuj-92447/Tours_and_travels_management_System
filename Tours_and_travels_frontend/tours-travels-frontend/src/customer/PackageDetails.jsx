@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTheme } from "./CustomerThemeContext";
 import { getApprovedPackagesApi } from "../api/customerApi";
 import { createBookingApi } from "../api/bookingApi";
@@ -14,7 +14,11 @@ const PackageDetails = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  useEffect(() => {
+  const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
     loadPackageDetails();
   }, [packageId]);
 

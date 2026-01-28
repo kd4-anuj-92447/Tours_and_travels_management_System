@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef} from "react";
 import {
   getAllPackagesAdminApi,
   approvePackageApi,
@@ -27,7 +27,10 @@ const ManageAdminPackages = () => {
   const [loading, setLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
+  const hasLoaded = useRef(false);
   useEffect(() => {
+     if (hasLoaded.current) return;
+  hasLoaded.current = true;
     loadPackages();
   }, []);
 

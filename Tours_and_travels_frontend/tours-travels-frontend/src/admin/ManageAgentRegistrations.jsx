@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect , useRef} from "react";
 import { toast } from "react-toastify";
 import { getAgentRegistrationsApi, approveAgentApi, rejectAgentApi } from "../api/adminApi";
 
@@ -8,7 +8,11 @@ const ManageAgentRegistrations = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("pending");
 
+  const hasLoaded = useRef(false);
+
   useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
     fetchAgents();
   }, []);
 

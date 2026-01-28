@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef  } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -45,14 +45,21 @@ const AdminDashboard = () => {
     paddingBottom: "2rem",
   };
 
-  useEffect(() => {
-    const role = getUserRole();
-    if (role !== "ADMIN") {
-      navigate("/unauthorized");
-      return;
-    }
-    loadDashboardData();
-  }, []);
+  const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
+
+  const role = getUserRole();
+  if (role !== "ADMIN") {
+    navigate("/unauthorized");
+    return;
+  }
+
+  loadDashboardData();
+}, []);
+
 
   const loadDashboardData = async () => {
     try {

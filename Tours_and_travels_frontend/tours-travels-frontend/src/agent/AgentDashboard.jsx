@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getMyPackagesApi,
@@ -30,7 +30,11 @@ const AgentDashboard = () => {
     paddingBottom: "2rem",
   };
 
-  useEffect(() => {
+  const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
     const role = getUserRole();
     if (role !== "AGENT") {
       toast.error("Unauthorized access");

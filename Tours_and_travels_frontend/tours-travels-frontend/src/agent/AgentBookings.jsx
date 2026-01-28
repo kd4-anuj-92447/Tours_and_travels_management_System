@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -13,7 +13,12 @@ const AgentBookings = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
 
-  useEffect(() => {
+ const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
+
     if (getUserRole() !== "AGENT") {
       navigate("/unauthorized");
       return;

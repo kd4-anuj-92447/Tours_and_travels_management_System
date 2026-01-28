@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { useTheme } from "./CustomerThemeContext";
 
@@ -30,7 +30,11 @@ const Payment = () => {
     paddingBottom: "2rem",
   };
 
-  useEffect(() => {
+  const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
     loadBookingDetails();
   }, [bookingId]);
 

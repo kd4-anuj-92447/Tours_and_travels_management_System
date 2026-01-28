@@ -1,10 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTheme } from "./CustomerThemeContext";
 
 import { getMyBookingsCustomerApi } from "../api/customerApi";
 import { cancelBookingByCustomerApi } from "../api/bookingApi";
+
+/* ================= LOCAL STORAGE HELPERS ================= */
+
+const getHiddenKey = (email) => `hiddenBookings_${email}`;
+
+const getHiddenBookings = (email) => {
+  try {
+    return JSON.parse(localStorage.getItem(getHiddenKey(email))) || [];
+  } catch {
+    return [];
+  }
+};
+
+const saveHiddenBooking = (email, bookingId) => {
+  const existing = getHiddenBookings(email);
+  localStorage.setItem(
+    getHiddenKey(email),
+    JSON.stringify([...new Set([...existing, bookingId])])
+  );
+};
 
 /* ================= STATUS BADGE ================= */
 
@@ -29,11 +49,14 @@ const StatusBadge = ({ status }) => {
 
 const CustomerBookings = () => {
   const navigate = useNavigate();
-  const themeContext = useTheme();
-  const { theme = "day" } = themeContext || {};
+  const { theme = "day" } = useTheme() || {};
+
+  const customerEmail = localStorage.getItem("email");
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const hasLoaded = useRef(false);
 
   const backgroundStyle = {
     backgroundImage:
@@ -53,8 +76,12 @@ const CustomerBookings = () => {
   const loadBookings = async () => {
     try {
       const res = await getMyBookingsCustomerApi();
-      setBookings(res.data || []);
-    } catch (error) {
+      const hidden = getHiddenBookings(customerEmail);
+
+      setBookings(
+        (res.data || []).filter((b) => !hidden.includes(b.id))
+      );
+    } catch {
       toast.error("Failed to load bookings");
     } finally {
       setLoading(false);
@@ -62,6 +89,8 @@ const CustomerBookings = () => {
   };
 
   useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
     loadBookings();
   }, []);
 
@@ -72,24 +101,28 @@ const CustomerBookings = () => {
 
     try {
       await cancelBookingByCustomerApi(bookingId);
-      toast.success("Booking cancelled successfully");
+      toast.success("Booking cancelled");
       loadBookings();
     } catch (error) {
-      toast.error(
-      error.response?.data || "Failed to cancel booking"
-    );
-  }
+      toast.error(error.response?.data || "Failed to cancel booking");
+    }
+  };
 
+  /* ================= DELETE (HIDE) BOOKING ================= */
+
+  const handleDeleteBooking = (bookingId) => {
+    if (!window.confirm("Remove this cancelled booking from your list?")) return;
+
+    saveHiddenBooking(customerEmail, bookingId);
+    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+    toast.info("Booking removed from your list");
   };
 
   /* ================= LOADING ================= */
 
   if (loading) {
     return (
-      <div
-        style={backgroundStyle}
-        className="d-flex align-items-center justify-content-center"
-      >
+      <div style={backgroundStyle} className="d-flex align-items-center justify-content-center">
         <div className="text-center">
           <div className="spinner-border text-primary" />
           <p className={`mt-3 ${theme === "night" ? "text-white" : "text-dark"}`}>
@@ -116,10 +149,8 @@ const CustomerBookings = () => {
 
         {bookings.length === 0 && (
           <div className="card border-0 shadow-lg text-center p-5">
-            <h4>✈️ No Bookings Yet</h4>
-            <p className="text-muted">
-              You haven't booked any packages yet.
-            </p>
+            <h4>✈️ No Active Bookings</h4>
+            <p className="text-muted">All cancelled bookings are hidden.</p>
             <button
               className="btn btn-primary btn-lg mt-3"
               onClick={() => navigate("/customer/packages")}
@@ -135,9 +166,7 @@ const CustomerBookings = () => {
               booking.status === "PENDING" &&
               booking.paymentStatus === "PENDING";
 
-            const canCancel =
-              booking.status === "PENDING" &&
-              booking.paymentStatus === "PENDING";
+            const canCancel = canPay;
 
             const isCancelled =
               booking.status === "CANCELLED" ||
@@ -147,41 +176,29 @@ const CustomerBookings = () => {
               <div className="col-lg-4 col-md-6" key={booking.id}>
                 <div className="card shadow-lg border-0 h-100">
                   <div className="card-body d-flex flex-column">
-                    <h5 className="fw-bold mb-3">
-                      {booking.packageName}
-                    </h5>
+                    <h5 className="fw-bold mb-3">{booking.packageName}</h5>
 
                     <div className="mb-2">
                       <small>Booking Status</small>
-                      <div>
-                        <StatusBadge status={booking.status} />
-                      </div>
+                      <div><StatusBadge status={booking.status} /></div>
                     </div>
 
                     <div className="mb-3">
                       <small>Payment Status</small>
-                      <div>
-                        <StatusBadge status={booking.paymentStatus} />
-                      </div>
+                      <div><StatusBadge status={booking.paymentStatus} /></div>
                     </div>
 
-                    <p className="fw-bold text-success mb-3">
-                      ₹{booking.amount}
-                    </p>
+                    <p className="fw-bold text-success mb-3">₹{booking.amount}</p>
 
-                    {/* PAY NOW */}
                     {canPay && (
                       <button
                         className="btn btn-success w-100 mt-auto fw-bold"
-                        onClick={() =>
-                          navigate(`/customer/payment/${booking.id}`)
-                        }
+                        onClick={() => navigate(`/customer/payment/${booking.id}`)}
                       >
                         💳 Pay Now
                       </button>
                     )}
 
-                    {/* CANCEL BOOKING */}
                     {canCancel && (
                       <button
                         className="btn btn-outline-danger w-100 mt-2"
@@ -191,14 +208,20 @@ const CustomerBookings = () => {
                       </button>
                     )}
 
-                    {/* CANCELLED MESSAGE */}
                     {isCancelled && (
-                      <div className="alert alert-danger mt-auto mb-0 text-center">
-                        ✖ Booking Cancelled
-                      </div>
+                      <>
+                        <div className="alert alert-danger mt-auto mb-2 text-center">
+                          ✖ Booking Cancelled
+                        </div>
+                        <button
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => handleDeleteBooking(booking.id)}
+                        >
+                          🗑️ Remove from My Bookings
+                        </button>
+                      </>
                     )}
 
-                    {/* PAYMENT DONE */}
                     {booking.paymentStatus === "SUCCESS" &&
                       booking.status === "CONFIRMED" && (
                         <div className="alert alert-success mt-auto mb-0 text-center">

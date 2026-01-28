@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   updatePackageApi,
@@ -24,7 +24,11 @@ const EditPackage = () => {
 
   /* ================= LOAD PACKAGE ================= */
 
-  useEffect(() => {
+  const hasLoaded = useRef(false);
+
+useEffect(() => {
+  if (hasLoaded.current) return;
+  hasLoaded.current = true;
     loadPackage();
   }, []);
 

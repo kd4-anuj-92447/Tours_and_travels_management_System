@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import {
   getAllBookingsAdminApi,
@@ -25,8 +25,11 @@ const ManageBookings = () => {
       setLoading(false);
     }
   };
-
+  const hasLoaded = useRef(false);
   useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+
     loadBookings();
   }, []);
 
