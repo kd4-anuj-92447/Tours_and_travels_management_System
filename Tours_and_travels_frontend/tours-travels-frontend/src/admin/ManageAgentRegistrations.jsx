@@ -8,6 +8,11 @@ const ManageAgentRegistrations = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("pending");
 
+   /**
+   * useRef used to prevent
+   * double API calls & duplicate toasts
+   * (especially in React Strict Mode)
+   */
   const hasLoaded = useRef(false);
 
   useEffect(() => {
@@ -55,7 +60,7 @@ const ManageAgentRegistrations = () => {
       toast.error("Failed to reject agent", { autoClose: 1000 });
     }
   };
-
+   // agent info card 
   const AgentCard = ({ agent, isPending }) => (
     <div className="card mb-3 p-3 border-left-2">
       <div className="row">
@@ -100,7 +105,8 @@ const ManageAgentRegistrations = () => {
       </div>
     </div>
   );
-
+  // Show loader while data is loading
+n 
   if (loading) {
     return <div className="text-center p-4">Loading agent registrations...</div>;
   }
