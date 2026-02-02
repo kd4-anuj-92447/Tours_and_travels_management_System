@@ -170,7 +170,7 @@ useEffect(() => {
                       <div className="card-body">
                         <h6 className="card-title fw-bold">{pkg.title}</h6>
                         <p className="text-muted small mb-2">
-                          <strong>Price:</strong> ${pkg.price}
+                          <strong>Price:</strong> ₹ {pkg.price}
                         </p>
                         <p className="text-muted small mb-2">
                           <strong>Duration:</strong> {pkg.duration} days

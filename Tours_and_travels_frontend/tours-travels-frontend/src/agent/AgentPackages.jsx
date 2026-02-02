@@ -63,15 +63,25 @@ useEffect(() => {
 
 
   return (
+    
     <div className="container mt-4">
       <div className="d-flex justify-content-between mb-3">
         <h3>My Packages</h3>
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate("/agent/create-package")}
-        >
-          + Create Package
-        </button>
+         <div className="d-flex gap-2">
+          <button
+            className="btn btn-outline-secondary"
+            onClick={() => navigate("/agent")}
+          >
+            ← Back to Home
+          </button>
+
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/agent/create")}
+          >
+            + Create Package
+          </button>
+        </div>
       </div>
 
       {packages.length === 0 && (

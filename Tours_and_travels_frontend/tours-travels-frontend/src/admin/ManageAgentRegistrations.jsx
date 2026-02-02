@@ -7,6 +7,7 @@ const ManageAgentRegistrations = () => {
   const [approvedAgents, setApprovedAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("pending");
+  
 
   const hasLoaded = useRef(false);
 

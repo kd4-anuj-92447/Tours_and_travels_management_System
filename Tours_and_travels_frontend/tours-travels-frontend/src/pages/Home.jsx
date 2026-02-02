@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import Navbar from './../components/common/Navbar';
 import { ThemeContext } from "../customer/CustomerThemeContext";
+import HomeNavbar from "../pages/HomeNavbar";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -23,8 +23,7 @@ const Home = () => {
 
   return (
     <>
-      <Navbar />
-
+      <HomeNavbar />
       {/* HERO SECTION */}
       <section style={heroStyle} className="text-center py-5">
         <div className="container">

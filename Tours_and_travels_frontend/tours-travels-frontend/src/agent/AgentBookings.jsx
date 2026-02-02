@@ -13,11 +13,11 @@ const AgentBookings = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
 
- const hasLoaded = useRef(false);
+  const hasLoaded = useRef(false);
 
-useEffect(() => {
-  if (hasLoaded.current) return;
-  hasLoaded.current = true;
+  useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
 
     if (getUserRole() !== "AGENT") {
       navigate("/unauthorized");
@@ -71,6 +71,8 @@ useEffect(() => {
               <th>ID</th>
               <th>Customer</th>
               <th>Package</th>
+              <th>Booking Date</th>
+              <th>Tour Date</th>
               <th>Status</th>
               <th>Action</th>
             </tr>
@@ -79,7 +81,7 @@ useEffect(() => {
           <tbody>
             {bookings.length === 0 ? (
               <tr>
-                <td colSpan="5" className="text-center">
+                <td colSpan="7" className="text-center">
                   No bookings found
                 </td>
               </tr>
@@ -89,6 +91,8 @@ useEffect(() => {
                   <td>{b.id}</td>
                   <td>{b.customerName}</td>
                   <td>{b.packageName}</td>
+                  <td>{b.bookingDate}</td>
+                  <td>{b.tourStartDate}</td>
                   <td>{getStatusBadge(b.status)}</td>
                   <td>
                     {b.status === "PENDING" ? (

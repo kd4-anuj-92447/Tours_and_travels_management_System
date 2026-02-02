@@ -51,6 +51,25 @@ public class AgentPackageController {
         User agent = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Agent not found: " + email));
 
+        // ---------------- ROBUST FUTURE-PROOF VALIDATION ----------------
+        // Either both times must be present or both must be null
+        if ((tourPackage.getTourStartTime() != null && tourPackage.getTourEndTime() == null)
+                || (tourPackage.getTourStartTime() == null && tourPackage.getTourEndTime() != null)) {
+
+            throw new RuntimeException(
+                    "Both tour start time and tour end time must be provided together"
+            );
+        }
+
+        // If both are present, end must be after start
+        if (tourPackage.getTourStartTime() != null
+                && tourPackage.getTourEndTime() != null
+                && tourPackage.getTourEndTime().isBefore(tourPackage.getTourStartTime())) {
+
+            throw new RuntimeException("Tour end time must be after tour start time");
+        }
+        // ----------------------------------------------------------------
+
         tourPackage.setAgent(agent);
         tourPackage.setStatus(PackageStatus.PENDING);
 

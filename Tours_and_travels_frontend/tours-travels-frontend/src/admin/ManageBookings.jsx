@@ -108,6 +108,8 @@ const ManageBookings = () => {
               <th>ID</th>
               <th>Customer</th>
               <th>Package</th>
+              <th>Booking Date</th>
+              <th>Tour Date</th>
               <th>Amount</th>
               <th>Booking Status</th>
               <th>Payment Status</th>
@@ -121,40 +123,54 @@ const ManageBookings = () => {
                 <td>{b.id}</td>
                 <td>{b.user?.name || b.customerName || "N/A"}</td>
                 <td>{b.tourPackage?.title || b.packageName || "N/A"}</td>
+                <td>{b.bookingDate}</td>
+                <td>{b.tourStartDate}</td>
                 <td>₹ {b.amount}</td>
                 <td>{getStatusBadge(b.status)}</td>
                 <td>
-                  <span className={`badge bg-${b.paymentStatus === "PAID" ? "success" : b.paymentStatus === "PENDING" ? "warning" : "secondary"}`}>
+                  <span
+                    className={`badge bg-${
+                      b.paymentStatus === "PAID"
+                        ? "success"
+                        : b.paymentStatus === "PENDING"
+                        ? "warning"
+                        : "secondary"
+                    }`}
+                  >
                     {b.paymentStatus || "UNPAID"}
                   </span>
                 </td>
                 <td>
                   {b.status === "PENDING" && b.paymentStatus === "SUCCESS" && (
-                  <>
-                  <button
-                    className="btn btn-success btn-sm me-2"
-                    onClick={() => confirmBooking(b.id)}
-                    disabled={loading}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleCancelBooking(b.id)}
-                    disabled={loading}
-                  >
-                    Reject
-                  </button>
-                  </>
+                    <>
+                      <button
+                        className="btn btn-success btn-sm me-2"
+                        onClick={() => confirmBooking(b.id)}
+                        disabled={loading}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleCancelBooking(b.id)}
+                        disabled={loading}
+                      >
+                        Reject
+                      </button>
+                    </>
                   )}
 
-                {b.status === "PENDING" && b.paymentStatus !== "SUCCESS" && (
-                <span className="text-muted small">Awaiting Payment</span>
-                 )}
+                  {b.status === "PENDING" &&
+                    b.paymentStatus !== "SUCCESS" && (
+                      <span className="text-muted small">
+                        Awaiting Payment
+                      </span>
+                    )}
 
-              { b.status !== "PENDING" && <span className="text-muted">—</span>}
-              </td>
-
+                  {b.status !== "PENDING" && (
+                    <span className="text-muted">—</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -187,7 +203,9 @@ const ManageBookings = () => {
                 <button
                   type="button"
                   className="btn btn-danger"
-                  onClick={() => confirmCancelBooking(confirmAction.bookingId)}
+                  onClick={() =>
+                    confirmCancelBooking(confirmAction.bookingId)
+                  }
                 >
                   Yes, Cancel
                 </button>

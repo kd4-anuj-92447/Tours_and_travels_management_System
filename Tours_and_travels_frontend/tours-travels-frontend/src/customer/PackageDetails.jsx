@@ -2,23 +2,24 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useTheme } from "./CustomerThemeContext";
 import { getApprovedPackagesApi } from "../api/customerApi";
-import { createBookingApi } from "../api/bookingApi";
 import { toast } from "react-toastify";
 
 const PackageDetails = () => {
   const { packageId } = useParams();
   const navigate = useNavigate();
   const { theme } = useTheme();
+
   const [pkg, setPkg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  
   const hasLoaded = useRef(false);
 
-useEffect(() => {
-  if (hasLoaded.current) return;
-  hasLoaded.current = true;
+  useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
     loadPackageDetails();
   }, [packageId]);
 
@@ -27,8 +28,11 @@ useEffect(() => {
       setLoading(true);
       const res = await getApprovedPackagesApi();
       const packages = Array.isArray(res.data) ? res.data : [];
-      const selectedPackage = packages.find((p) => p.id === parseInt(packageId));
-      
+
+      const selectedPackage = packages.find(
+        (p) => p.id === parseInt(packageId)
+      );
+
       if (selectedPackage) {
         setPkg(selectedPackage);
       } else {
@@ -44,23 +48,8 @@ useEffect(() => {
     }
   };
 
-  const handleBookNow = async () => {
-    try {
-      setBookingLoading(true);
-      const response = await createBookingApi(pkg.id);
-      const bookingId = response.data.id || response.data?.bookingId;
-
-      toast.success("Booking created! Proceeding to payment...", { autoClose: 1000 });
-      navigate(`/customer/payment/${bookingId}`);
-    } catch (error) {
-      if (error.response?.status === 403) {
-        toast.error("You are not authorized", { autoClose: 1000 });
-      } else {
-        toast.error(error.response?.data?.message || "Failed to create booking", { autoClose: 1000 });
-      }
-    } finally {
-      setBookingLoading(false);
-    }
+  const handleBookNow = () => {
+  navigate(`/customer/customize-booking/${pkg.id}`);
   };
 
   const nextImage = () => {
@@ -93,7 +82,9 @@ useEffect(() => {
       <div style={backgroundStyle}>
         <div className="container text-center py-5">
           <div className="spinner-border text-primary" role="status" />
-          <p className={`mt-3 ${theme === "night" ? "text-white" : "text-dark"}`}>Loading package details...</p>
+          <p className={`mt-3 ${theme === "night" ? "text-white" : "text-dark"}`}>
+            Loading package details...
+          </p>
         </div>
       </div>
     );
@@ -103,7 +94,9 @@ useEffect(() => {
     return (
       <div style={backgroundStyle}>
         <div className="container">
-          <div className="alert alert-danger text-center">Package not found</div>
+          <div className="alert alert-danger text-center">
+            Package not found
+          </div>
         </div>
       </div>
     );
@@ -112,7 +105,7 @@ useEffect(() => {
   return (
     <div style={backgroundStyle}>
       <div className="container">
-        {/* Back Button */}
+
         <button
           className="btn btn-outline-primary mb-4"
           onClick={() => navigate(-1)}
@@ -121,10 +114,11 @@ useEffect(() => {
         </button>
 
         <div className="row">
-          {/* Left Column - Images */}
+
+          {/* Images */}
           <div className="col-lg-6 mb-4">
             <div className={`card shadow-lg border-0 ${theme === "night" ? "bg-dark text-light" : ""}`}>
-              {/* Main Image */}
+
               {pkg.imageUrls && pkg.imageUrls.length > 0 ? (
                 <div style={{ position: "relative" }}>
                   <img
@@ -134,7 +128,6 @@ useEffect(() => {
                     style={{ height: "400px", objectFit: "cover" }}
                   />
 
-                  {/* Image Navigation */}
                   {pkg.imageUrls.length > 1 && (
                     <>
                       <button
@@ -151,6 +144,7 @@ useEffect(() => {
                       >
                         ◀
                       </button>
+
                       <button
                         className="btn btn-light"
                         onClick={nextImage}
@@ -166,7 +160,6 @@ useEffect(() => {
                         ▶
                       </button>
 
-                      {/* Image Counter */}
                       <div
                         style={{
                           position: "absolute",
@@ -187,13 +180,17 @@ useEffect(() => {
               ) : (
                 <div
                   className="bg-secondary"
-                  style={{ height: "400px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  style={{
+                    height: "400px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
                   <span className="text-white">No Images Available</span>
                 </div>
               )}
 
-              {/* Thumbnail Gallery */}
               {pkg.imageUrls && pkg.imageUrls.length > 1 && (
                 <div className="card-body p-2">
                   <div className="d-flex gap-2" style={{ overflowX: "auto" }}>
@@ -217,39 +214,57 @@ useEffect(() => {
                   </div>
                 </div>
               )}
+
             </div>
           </div>
 
-          {/* Right Column - Details */}
+          {/* Details */}
           <div className="col-lg-6">
             <div className={`card shadow-lg border-0 h-100 ${theme === "night" ? "bg-dark text-light" : ""}`}>
               <div className="card-body">
-                {/* Title */}
+
                 <div className="d-flex justify-content-between align-items-start mb-3">
                   <h1 className="card-title fw-bold mb-0">{pkg.title}</h1>
                   <span className="badge bg-success">✓ APPROVED</span>
                 </div>
 
-                {/* Destination */}
                 {pkg.destination && (
                   <p className={`${theme === "night" ? "text-light" : "text-muted"} mb-2`}>
                     <strong>📍 Destination:</strong> {pkg.destination}
                   </p>
                 )}
 
-                {/* Duration */}
                 {pkg.duration && (
                   <p className={`${theme === "night" ? "text-light" : "text-muted"} mb-2`}>
                     <strong>⏱️ Duration:</strong> {pkg.duration}
                   </p>
                 )}
 
-                {/* Price */}
-                <h3 className={`${theme === "night" ? "text-warning" : "text-primary"} mb-4`}>
+                <h3 className={`${theme === "night" ? "text-warning" : "text-primary"} mb-2`}>
                   ₹ {parseFloat(pkg.price).toLocaleString("en-IN")}
                 </h3>
 
-                {/* Description */}
+                {pkg.tourStartTime && pkg.tourEndTime && (
+                  <p className="text-muted mb-3">
+                    <strong>🕒 Tour window:</strong>{" "}
+                    {new Date(pkg.tourStartTime).toLocaleString()} –{" "}
+                    {new Date(pkg.tourEndTime).toLocaleString()}
+                  </p>
+                )}
+
+                <div className="mb-3">
+                  <label className="form-label">Number of tourists</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className="form-control"
+                    value={touristsCount}
+                    onChange={(e) =>
+                      setTouristsCount(Number(e.target.value))
+                    }
+                  />
+                </div>
+
                 <div className={`mb-4 pb-3 border-bottom ${theme === "night" ? "border-secondary" : ""}`}>
                   <h5 className="fw-bold mb-2">About this package</h5>
                   <p className={`${theme === "night" ? "text-light" : "text-muted"} lh-lg`}>
@@ -257,7 +272,6 @@ useEffect(() => {
                   </p>
                 </div>
 
-                {/* Package Highlights */}
                 <div className="mb-4">
                   <h5 className="fw-bold mb-3">📋 Package Highlights</h5>
                   <ul className={`${theme === "night" ? "text-light" : "text-muted"}`}>
@@ -269,7 +283,18 @@ useEffect(() => {
                   </ul>
                 </div>
 
-                {/* Book Now Button */}
+                <div className="mb-3">
+                  <label className="form-label">Select tour date</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={tourStartDate}
+                    onChange={(e) => setTourStartDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                    required
+                  />
+                </div>
+
                 <button
                   className="btn btn-primary btn-lg w-100 fw-bold shadow-lg"
                   onClick={handleBookNow}
@@ -277,16 +302,21 @@ useEffect(() => {
                 >
                   {bookingLoading ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" />
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                      />
                       Processing...
                     </>
                   ) : (
                     "🎫 Book Now"
                   )}
                 </button>
+
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

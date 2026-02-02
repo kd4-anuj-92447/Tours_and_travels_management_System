@@ -15,6 +15,8 @@ const CreatePackage = () => {
     description: "",
     price: "",
     duration: "",
+    tourStartTime: "",
+    tourEndTime: ""
   });
 
   const [files, setFiles] = useState([]);
@@ -30,7 +32,6 @@ const CreatePackage = () => {
     const selected = [...e.target.files].slice(0, 5);
     setFiles(selected);
 
-    // local preview only
     const previews = selected.map((f) => URL.createObjectURL(f));
     setPreviewUrls(previews);
   };
@@ -55,56 +56,69 @@ const CreatePackage = () => {
   /* ================= SUBMIT ================= */
 
   const submit = async () => {
-  if (!form.title || !form.destination || !form.description || !form.price || !form.duration) {
-    toast.error("All fields are required");
-    return;
-  }
-
-  if (imageMode === "file" && files.length === 0) {
-    toast.error("Please select at least one image");
-    return;
-  }
-
-  if (imageMode === "url" && imageUrls.length === 0) {
-    toast.error("Please add at least one image URL");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const payload = {
-      ...form,
-      price: Number(form.price),
-      status: "PENDING"
-    };
-
-    const pkgRes = await createPackageApi(payload);
-
-    const packageId = pkgRes.data.id; // ✅ FIX
-
-    if (!packageId) {
-      throw new Error("Package ID not returned from server");
+    if (
+      !form.title ||
+      !form.destination ||
+      !form.description ||
+      !form.price ||
+      !form.duration
+    ) {
+      toast.error("All fields are required");
+      return;
     }
 
-    if (imageMode === "file") {
-      await uploadPackageImagesApi(packageId, files);
-    } else {
-      await addPackageImageUrlsApi(packageId, imageUrls);
+    if (imageMode === "file" && files.length === 0) {
+      toast.error("Please select at least one image");
+      return;
     }
 
-    toast.success("Package submitted for admin approval!");
+    if (imageMode === "url" && imageUrls.length === 0) {
+      toast.error("Please add at least one image URL");
+      return;
+    }
 
-    navigate("/agent/packages");
+    if (
+      (form.tourStartTime && !form.tourEndTime) ||
+      (!form.tourStartTime && form.tourEndTime)
+    ) {
+      toast.error("Please provide both tour start and end time");
+      return;
+    }
 
-  } catch (err) {
-    console.error(err);
-    toast.error(err.response?.data?.message || "Failed to create package");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
 
+      const payload = {
+        ...form,
+        price: Number(form.price),
+        status: "PENDING",
+      };
+
+      // ✅ FIX: capture API response
+      const pkgRes = await createPackageApi(payload);
+
+      const packageId = pkgRes.data?.id;
+
+      if (!packageId) {
+        throw new Error("Package ID not returned from server");
+      }
+
+      if (imageMode === "file") {
+        await uploadPackageImagesApi(packageId, files);
+      } else {
+        await addPackageImageUrlsApi(packageId, imageUrls);
+      }
+
+      toast.success("Package submitted for admin approval!");
+
+      navigate("/agent/packages");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to create package");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* ================= UI ================= */
 
@@ -120,8 +134,14 @@ const CreatePackage = () => {
         </button>
       </div>
 
-      <div className="card shadow p-5" style={{ maxWidth: "700px", margin: "0 auto" }}>
-        <p className="text-muted mb-4">Fill in the details below. Your package will be submitted for admin approval.</p>
+      <div
+        className="card shadow p-5"
+        style={{ maxWidth: "700px", margin: "0 auto" }}
+      >
+        <p className="text-muted mb-4">
+          Fill in the details below. Your package will be submitted for admin
+          approval.
+        </p>
 
         <input
           className="form-control mb-3"
@@ -175,8 +195,36 @@ const CreatePackage = () => {
             />
           </div>
         </div>
+        
+        <div className="row">
+          <div className="col-md-6">
+            <label className="form-label">Tour start time</label>
+            <input
+              type="datetime-local"
+              className="form-control mb-3"
+              value={form.tourStartTime}
+              onChange={(e) =>
+                setForm({ ...form, tourStartTime: e.target.value })
+              }
+            />
+          </div>
 
-        <label className="form-label fw-bold mt-2">📸 Package Images (Max 5)</label>
+          <div className="col-md-6">
+            <label className="form-label">Tour end time</label>
+            <input
+              type="datetime-local"
+              className="form-control mb-3"
+              value={form.tourEndTime}
+              onChange={(e) =>
+                setForm({ ...form, tourEndTime: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        <label className="form-label fw-bold mt-2">
+          📸 Package Images (Max 5)
+        </label>
 
         {/* Image Mode Toggle */}
         <div className="btn-group w-100 mb-3" role="group">
@@ -217,9 +265,10 @@ const CreatePackage = () => {
               className="form-control mb-3"
               onChange={handleFileChange}
             />
-            <small className="text-muted d-block mb-3">Upload clear, attractive images of the destination</small>
+            <small className="text-muted d-block mb-3">
+              Upload clear, attractive images of the destination
+            </small>
 
-            {/* Image previews */}
             {previewUrls.length > 0 && (
               <div className="mb-4">
                 <label className="form-label fw-bold">Preview:</label>
@@ -230,7 +279,10 @@ const CreatePackage = () => {
                         src={url}
                         alt={`preview-${i}`}
                         className="img-fluid rounded border"
-                        style={{ height: "120px", objectFit: "cover" }}
+                        style={{
+                          height: "120px",
+                          objectFit: "cover",
+                        }}
                       />
                     </div>
                   ))}
@@ -260,12 +312,16 @@ const CreatePackage = () => {
                 Add
               </button>
             </div>
-            <small className="text-muted d-block mb-3">Paste image URLs directly from the web (Max 5 images)</small>
 
-            {/* URL Preview List */}
+            <small className="text-muted d-block mb-3">
+              Paste image URLs directly from the web (Max 5 images)
+            </small>
+
             {imageUrls.length > 0 && (
               <div className="mb-4">
-                <label className="form-label fw-bold">Added URLs:</label>
+                <label className="form-label fw-bold">
+                  Added URLs:
+                </label>
                 <div className="row g-2">
                   {imageUrls.map((url, i) => (
                     <div className="col-md-3 col-sm-4 col-6" key={i}>
@@ -274,9 +330,14 @@ const CreatePackage = () => {
                           src={url}
                           alt={`url-${i}`}
                           className="img-fluid rounded border"
-                          style={{ height: "120px", objectFit: "cover", width: "100%" }}
+                          style={{
+                            height: "120px",
+                            objectFit: "cover",
+                            width: "100%",
+                          }}
                           onError={(e) => {
-                            e.target.src = "https://via.placeholder.com/120?text=Invalid+URL";
+                            e.target.src =
+                              "https://via.placeholder.com/120?text=Invalid+URL";
                           }}
                         />
                         <button
@@ -307,6 +368,7 @@ const CreatePackage = () => {
           >
             {loading ? "🔄 Submitting..." : "✨ Submit for Approval"}
           </button>
+
           <button
             className="btn btn-outline-secondary"
             onClick={() => navigate("/agent/packages")}

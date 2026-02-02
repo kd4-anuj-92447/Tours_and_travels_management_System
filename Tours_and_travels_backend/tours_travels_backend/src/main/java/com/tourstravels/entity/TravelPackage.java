@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +36,21 @@ public class TravelPackage {
 
     @Column(length = 100)
     private String duration;
+    
+    /* ================= TIME & DATES =========== */
+    
+    @Column(name = "tour_start_time")
+    private LocalDateTime tourStartTime;
+
+    @Column(name = "tour_end_time")
+    private LocalDateTime tourEndTime;
+
+    @Column(name = "transport_mode")
+    private String transportMode;
+
+    @Column(name = "transport_details", length = 500)
+    private String transportDetails;
+
 
     /* ================= STATUS ================= */
 

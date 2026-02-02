@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "bookings")
@@ -31,6 +32,9 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id", nullable = false)
     private TravelPackage tourPackage;
+    
+    @Column(name = "tourists_count", nullable = false)
+    private Integer touristsCount;
 
     /* STATUS — MUST BE STRING */
     @Enumerated(EnumType.STRING)
@@ -45,6 +49,13 @@ public class Booking {
     /* MONEY — MUST BE DECIMAL */
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
+    
+    @Column(name = "booking_date", nullable = false)
+    private LocalDate bookingDate;
+
+    @Column(name = "tour_start_date" , nullable = false)
+    private LocalDate tourStartDate;
+
 
     /* ================= TRANSIENT PROPERTIES FOR API ================= */
 

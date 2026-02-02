@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -60,14 +61,49 @@ public class BookingServiceImpl implements BookingService {
             throw new RuntimeException("Package not approved");
         }
 
+        // ---------- NEW VALIDATION & DATE HANDLING ----------
+
+     // customer must always choose a date
+        if (booking.getTourStartDate() == null) {
+            throw new RuntimeException("Tour date is required");
+        }
+
+        if (booking.getTourStartDate().isBefore(LocalDate.now())) {
+            throw new RuntimeException("Tour date cannot be in the past");
+        }
+
+        if (travelPackage.getTourStartTime() != null
+                && travelPackage.getTourEndTime() != null) {
+
+            LocalDate windowStart =
+                    travelPackage.getTourStartTime().toLocalDate();
+
+            LocalDate windowEnd =
+                    travelPackage.getTourEndTime().toLocalDate();
+
+            if (booking.getTourStartDate().isBefore(windowStart)
+                    || booking.getTourStartDate().isAfter(windowEnd)) {
+
+                throw new RuntimeException(
+                    "Selected date is outside the tour schedule"
+                );
+            }
+        }
+
+        // set booking date automatically
+        booking.setBookingDate(java.time.LocalDate.now());
+
+        // ----------------------------------------------------
+
         booking.setUser(customer);
         booking.setTourPackage(travelPackage);
         booking.setAmount(BigDecimal.valueOf(travelPackage.getPrice()));
         booking.setStatus(BookingStatus.PENDING);
-        booking.setPaymentStatus(PaymentStatus.PENDING);  // Initially PENDING payment
+        booking.setPaymentStatus(PaymentStatus.PENDING);
 
         return bookingRepository.save(booking);
     }
+
     
     //-------Cancel Booking by Customer------
 
