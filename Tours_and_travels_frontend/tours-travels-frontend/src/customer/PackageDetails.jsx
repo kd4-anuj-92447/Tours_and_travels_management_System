@@ -13,8 +13,9 @@ const PackageDetails = () => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [tourStartDate, setTourStartDate] = useState("");
 
-  
+
   const hasLoaded = useRef(false);
 
   useEffect(() => {
@@ -251,19 +252,6 @@ const PackageDetails = () => {
                     {new Date(pkg.tourEndTime).toLocaleString()}
                   </p>
                 )}
-
-                <div className="mb-3">
-                  <label className="form-label">Number of tourists</label>
-                  <input
-                    type="number"
-                    min="1"
-                    className="form-control"
-                    value={touristsCount}
-                    onChange={(e) =>
-                      setTouristsCount(Number(e.target.value))
-                    }
-                  />
-                </div>
 
                 <div className={`mb-4 pb-3 border-bottom ${theme === "night" ? "border-secondary" : ""}`}>
                   <h5 className="fw-bold mb-2">About this package</h5>

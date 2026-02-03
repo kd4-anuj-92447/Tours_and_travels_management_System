@@ -4,8 +4,18 @@ import axios from "./axiosInstance";
    CUSTOMER BOOKINGS
 ========================= */
 
-export const createBookingApi = (packageId) => {
-  return axios.post(`/customer/bookings`, { tourPackage: { id: packageId } });
+export const createBookingApi = (bookingPayloadOrPackageId) => {
+  if (
+    bookingPayloadOrPackageId &&
+    typeof bookingPayloadOrPackageId === "object"
+  ) {
+    return axios.post(`/customer/bookings`, bookingPayloadOrPackageId);
+  }
+
+  const packageId = Number(bookingPayloadOrPackageId);
+  return axios.post(`/customer/bookings`, {
+    tourPackage: { id: packageId },
+  });
 };
 
 export const getMyBookingsApi = () => {

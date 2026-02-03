@@ -70,7 +70,7 @@ useEffect(() => {
         paymentMode: "CARD",
       });
 
-      toast.success("Payment successful! Redirecting to bookings...", { autoClose: 1000 });
+      toast.success("Payment successful! Booking confirmed. Redirecting to bookings...", { autoClose: 1000 });
       navigate("/customer/bookings");
     } catch (error) {
       console.error("Payment error:", error);

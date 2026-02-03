@@ -1,52 +1,32 @@
-// React hooks for lifecycle, state management, and mutable references
 import { useEffect, useState, useRef } from "react";
-
-// Hook for programmatic navigation
 import { useNavigate } from "react-router-dom";
-
-// Toast notifications for success/error messages
 import { toast } from "react-toastify";
 
-// API calls related to agent bookings
 import {
   getAgentBookingsApi,
   updateBookingStatusApi,
 } from "../api/agentApi";
 
-// Utility function to get logged-in user's role
 import { getUserRole } from "../utils/auth";
 
 const AgentBookings = () => {
-  // Used to redirect users to other routes
   const navigate = useNavigate();
-
-  // State to store list of bookings assigned to the agent
   const [bookings, setBookings] = useState([]);
 
-<<<<<<< HEAD
   const hasLoaded = useRef(false);
 
   useEffect(() => {
-=======
-  // Ref to ensure useEffect runs only once (prevents double execution in React StrictMode)
-  const hasLoaded = useRef(false);
-
-  // Runs when component is mounted
-  useEffect(() => {
-    // Prevents re-execution if already loaded once
->>>>>>> 9d81333920e2195c9e40828441ee2eb819d45013
     if (hasLoaded.current) return;
     hasLoaded.current = true;
 
-    // Role-based access control: only AGENT can access this page
     if (getUserRole() !== "AGENT") {
       navigate("/unauthorized");
       return;
     }
 
-    // Load agent-specific bookings from backend
     loadBookings();
   }, []);
+
 
   // Fetch all bookings related to the logged-in agent
   const loadBookings = async () => {

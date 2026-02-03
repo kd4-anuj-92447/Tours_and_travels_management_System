@@ -6,6 +6,7 @@ import com.tourstravels.entity.User;
 import com.tourstravels.repository.PaymentRepository;
 import com.tourstravels.repository.UserRepository;
 import com.tourstravels.repository.BookingRepository;
+import com.tourstravels.enums.BookingStatus;
 import com.tourstravels.enums.PaymentStatus;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -85,8 +86,13 @@ public class CustomerPaymentController {
         // Check if payment already exists for this booking to avoid duplicate entry
         Optional<Payment> existingPaymentOpt = paymentRepository.findByBooking(booking);
         if (existingPaymentOpt.isPresent()) {
+            Payment existing = existingPaymentOpt.get();
             logger.info("⏭️ Payment already exists for Booking ID: {}. Returning existing payment.", bookingId);
-            return ResponseEntity.ok(existingPaymentOpt.get());
+            return ResponseEntity.ok(Map.of(
+                    "paymentId", existing.getId(),
+                    "status", existing.getStatus().name(),
+                    "bookingId", bookingId
+            ));
         }
 
         // Create payment - ALWAYS SUCCESSFUL FOR NOW
@@ -98,11 +104,19 @@ public class CustomerPaymentController {
         
         // Update booking payment status to SUCCESS (Booking status stays PENDING for admin approval)
         booking.setPaymentStatus(PaymentStatus.SUCCESS);
-        // ❌ DON'T change booking status - let admin confirm it manually
+        // Auto-confirm booking after successful payment
+        if (booking.getStatus() == BookingStatus.PENDING
+                || booking.getStatus() == BookingStatus.AGENT_APPROVED) {
+            booking.setStatus(BookingStatus.CONFIRMED);
+        }
         bookingRepository.save(booking);
         
         logger.info("✅ Payment created successfully. Booking ID: {} - Payment: SUCCESS, Booking Status: {} (awaiting admin confirmation)", 
                     bookingId, booking.getStatus());
-        return ResponseEntity.ok(savedPayment);
+        return ResponseEntity.ok(Map.of(
+                "paymentId", savedPayment.getId(),
+                "status", savedPayment.getStatus().name(),
+                "bookingId", bookingId
+        ));
     }
 }

@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { useTheme } from "./CustomerThemeContext";
 
 import { getApprovedPackagesApi } from "../api/customerApi";
-import { createBookingApi } from "../api/bookingApi";
 
 /* Status badge */
 const StatusBadge = () => (
@@ -107,30 +106,9 @@ useEffect(() => {
     }
   };
 
-  /* ✅ BOOK NOW – CREATE BOOKING AND NAVIGATE TO PAYMENT */
-  const handleBookNow = async (packageId) => {
-    try {
-      setLoadingId(packageId);
-
-      const response = await createBookingApi(packageId);
-      const bookingId = response.data.id || response.data?.bookingId;
-
-      toast.success(
-        "Booking created! Proceeding to payment...",
-        { autoClose: 1000 }
-      );
-
-      // Redirect to payment page with the booking ID
-      navigate(`/customer/payment/${bookingId}`);
-    } catch (error) {
-      if (error.response?.status === 403) {
-        toast.error("You are not authorized", { autoClose: 1000 });
-      } else {
-        toast.error(error.response?.data?.message || "Failed to create booking", { autoClose: 1000 });
-      }
-    } finally {
-      setLoadingId(null);
-    }
+  /* ✅ BOOK NOW – GO TO CUSTOMIZE BOOKING (SELECT DATE) */
+  const handleBookNow = (packageId) => {
+    navigate(`/customer/customize-booking/${packageId}`);
   };
 
   return (
