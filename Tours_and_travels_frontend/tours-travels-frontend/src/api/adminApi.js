@@ -50,7 +50,7 @@ export const confirmPaymentAdminApi = (paymentId) => {
 export const refundPaymentAdminApi = (paymentId) => {
   return axios.put(`/admin/payments/refund/${paymentId}`);
 };
-
+//get payment status
 export const getPaymentStatsAdminApi = () => {
   return axios.get("/admin/payments/stats");
 };

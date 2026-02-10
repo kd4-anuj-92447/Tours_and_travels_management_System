@@ -7,11 +7,12 @@ import axios from "./axiosInstance";
 export const createBookingApi = (packageId) => {
   return axios.post(`/customer/bookings`, { tourPackage: { id: packageId } });
 };
-
+//bookingsapi
 export const getMyBookingsApi = () => {
   return axios.get(`/customer/bookings`);
 };
 
+//cancel booking api
 export const cancelBookingByCustomerApi = (bookingId) => {
   return axios.put(`/customer/bookings/${bookingId}/cancel`, {});
 };

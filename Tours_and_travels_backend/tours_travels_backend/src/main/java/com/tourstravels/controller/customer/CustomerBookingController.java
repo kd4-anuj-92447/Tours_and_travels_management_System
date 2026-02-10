@@ -57,6 +57,7 @@ public class CustomerBookingController {
     }
 
     /* ================= CANCEL BOOKING ================= */
+//cancel booking
 
     @PutMapping("/bookings/{id}/cancel")
     public ResponseEntity<?> cancelBooking(
@@ -80,6 +81,7 @@ public class CustomerBookingController {
         return userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
+//updating profile
 
     @PutMapping("/profile")
     public User updateProfile(
