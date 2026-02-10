@@ -6,11 +6,12 @@ import {
   cancelBookingByAdmin
 } from "../api/adminApi";
 
+//managing bookings 
 const ManageBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
-
+  //load bookingss
   const loadBookings = async () => {
     try {
       setLoading(true);
@@ -47,7 +48,7 @@ const ManageBookings = () => {
       setLoading(false);
     }
   };
-
+  //handle booking
   const handleCancelBooking = (id) => {
     setConfirmAction({ type: "cancel", bookingId: id });
     toast.info("Confirm cancellation?", {
