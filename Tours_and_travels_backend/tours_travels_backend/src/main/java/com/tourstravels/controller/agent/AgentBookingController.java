@@ -32,7 +32,7 @@ public class AgentBookingController {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
     }
-
+//get all bookings
     @GetMapping
     public List<Booking> getMyBookings(Authentication auth) {
 
